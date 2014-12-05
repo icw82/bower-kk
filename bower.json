@@ -1,12 +1,12 @@
 {
     "name": "kenzo-kit",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "authors": ["icw82"],
     "main": [
-        "kk.core.js",
-        "kk.node.js",
-        "kk.ui.js",
-        "kk.reset.css"
+        "kk-core.js",
+        "kk-node.js",
+        "kk-ui.js",
+        "kk-reset.css"
     ],
     "ignore": [
         "*.md",

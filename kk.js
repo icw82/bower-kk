@@ -55,6 +55,11 @@ kenzo.each = function(array, callback){
     };
 }
 
+if (typeof each === 'undefined')
+    var each = kenzo.each;
+else
+    console.warn('Переменная «each» уже занята');
+
 kenzo.rand = function(){
     if (typeof arguments[0] == 'number'){
         if (typeof arguments[1] == 'number'){
@@ -349,16 +354,6 @@ kenzo.i8ArrayToString = function(array){
     return _;
 }
 
-
-// Адаптации
-if (typeof each === 'undefined')
-    var each = kenzo.each;
-else
-    console.warn('Переменная «each» уже занята');
-
-kenzo.plural_ru = kenzo.plural; // СПК
-var plural_ru = kenzo.plural; // ангажемент, атмр, романтик саунд
-var toggle_class = kenzo.toggle_class;
 
 // Старое
 
