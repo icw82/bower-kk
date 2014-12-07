@@ -1,9 +1,4 @@
-'use strict';
-
-//var path = require('path'),
-//    kenzo = {};
-
-kenzo.path = {}
+kenzo.path = {};
 
 kenzo.path.convert = function(p){
     if (path.sep === '\\')
@@ -22,4 +17,6 @@ kenzo.path.relative = function(original, root){
     return _;
 }
 
-module.exports = kenzo;
+if (typeof module === 'object'){
+    module.exports = kenzo;
+}
