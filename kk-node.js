@@ -16,7 +16,3 @@ kenzo.path.relative = function(original, root){
 
     return _;
 }
-
-if (typeof module === 'object'){
-    module.exports = kenzo;
-}
