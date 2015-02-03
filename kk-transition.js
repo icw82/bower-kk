@@ -55,4 +55,6 @@ if (typeof kenzo === 'object'){
             }
         });
     }
+
+    toggle_class = kenzo.toggle_class;
 }
