@@ -49,7 +49,6 @@ kenzo.r = root;
 // end ————————————————————————————————————————————————————————————————————————————————————— 100 ——|
 }());
 
-
 //  – — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —|
 
 //kenzo.num_to_ru = function(n){
@@ -156,29 +155,6 @@ kenzo.r = root;
 //    return false;
 //}
 //
-//kenzo.i8ArrayTo2 = function(array){
-//    var _ = '';
-//    each (array, function(item){
-//        _ += kenzo.i8to2(item);
-//    });
-//    return _;
-//}
-//
-//kenzo.i8to2 = function(int8){
-//    var _ = int8.toString(2);
-//    while (_.length < 8){
-//        _ = '0' + _;
-//    }
-//    return _;
-//}
-//
-//kenzo.i8ArrayToString = function(array){
-//    var _ = '';
-//    each (array, function(item){
-//        _ += String.fromCharCode(item);
-//    });
-//    return _;
-//}
 //
 //
 //// Старое
@@ -350,6 +326,30 @@ kenzo.class = function(element, classes, mask){
         kenzo.__a();
 }
 
+kenzo.i8to2 = function(int8){
+    var _ = int8.toString(2);
+    while (_.length < 8){
+        _ = '0' + _;
+    }
+    return _;
+}
+
+kenzo.i8ArrayTo2 = function(array){
+    var _ = '';
+    kk.each (array, function(item){
+        _ += kenzo.i8to2(item);
+    });
+    return _;
+}
+
+kenzo.i8ArrayToString = function(array){
+    var _ = '';
+    kk.each (array, function(item){
+        _ += String.fromCharCode(item);
+    });
+    return _;
+}
+
 kenzo.plural = function(){
     // TODO: Для других языков.
 
@@ -462,55 +462,3 @@ kenzo.rand = function(){
     } else
         kenzo.__a();
 };
-
-kenzo.toggle_class = function(element, classes, classlist, toggle_exist){
-    var kenzo = kk,
-        stop = false;
-
-    if (!(element instanceof kenzo._E))
-        return false;
-
-    if (typeof classes === kenzo._s)
-        classes = [classes];
-
-    if (!(classes instanceof kenzo._A))
-        return false;
-
-    if (typeof classlist === kenzo._u)
-        classlist = classes;
-    else if (!(classlist instanceof kenzo._A))
-        return false;
-
-    var exist = true;
-
-    if (toggle_exist === false)
-        return kenzo.class(element, classes, classlist)
-    else
-        toggle_exist = true;
-
-    // Объединение классов
-    each (classes, function(cls){
-        if (typeof cls !== kenzo._s){
-            stop = true;
-            return false;
-        }
-
-        if (classlist.indexOf(cls) < 0)
-            classlist.push(cls);
-        if (!element.classList.contains(cls))
-            exist = false;
-    });
-
-    if (stop) return false;
-
-    each (classlist, function(cls){
-        if (toggle_exist && exist) {
-            element.classList.remove(cls);
-        } else {
-            if (classes.indexOf(cls)  < 0)
-                element.classList.remove(cls);
-            else
-                element.classList.add(cls);
-        }
-    });
-}
