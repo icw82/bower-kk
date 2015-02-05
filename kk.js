@@ -49,173 +49,12 @@ kenzo.r = root;
 // end ————————————————————————————————————————————————————————————————————————————————————— 100 ——|
 }());
 
-//  – — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —|
-
-//kenzo.num_to_ru = function(n){
-//    if (typeof n == 'number')
-//        return n.toString().replace(/\./,',');
-//    if (typeof n == 'string')
-//        return n.replace(/\./,',');
-//}
-//
-//// Вызов событий
-//kenzo.generate = (function(){
-//    var resize = function(delay){
-//        if (typeof document.createEvent == 'function'){
-//            var event = document.createEvent('Event');
-//            event.initEvent('resize', true, true);
-//            window.dispatchEvent(event);
-//        }
-//    }
-//
-//    return {
-//        'resize': resize
-//    }
-//})();
-//
-//kenzo.is_nodes = function(){
-//    if ((typeof StaticNodeList == 'object') && (arguments[0] instanceof StaticNodeList))
-//        if (arguments[0].length > 0)
-//            return true;
-//        else
-//            return false;
-//
-//    if (arguments[0] instanceof NodeList)
-//        if (arguments[0].length > 0)
-//            return true;
-//        else
-//            return false;
-//}
-//
-
-//
-//kenzo.browser = (function(){
-//    if ('transform' in document.body.style)
-//        return 'normal';
-//    else if ('webkitTransform' in document.body.style)
-//        return 'webkit';
-//    else
-//        return 'old';
-//})();
-//
-//
-//kenzo.format = {}
-//// Российские номера
-//kenzo.format.phone = function(){
-//    if (arguments.length === 0) return false;
-//    if (typeof arguments[0] !== 'string') return false;
-//
-//    var
-//        string = arguments[0],
-//        number = string
-//            .replace(/[^\d\+]/g, '')
-//            .match(/^(?:\+7|8)([\d]{10})/);
-//
-//    if (number === null) return false;
-//    number = number[1];
-//
-//    return '+7 ('
-//        + number.slice(0, 3) + ') '
-//        + number.slice(3, 6) + '-'
-//        + number.slice(6, 8) + '-'
-//        + number.slice(8, 10);
-//}
-//
-//// Локальное хранилище
-//kenzo.ls = {
-//    'create': function(){
-//        each (arguments, function(item){
-//            if ((typeof item == 'string') && (!localStorage.getItem(item))){
-//                localStorage.setItem(item, JSON.stringify([]));
-//                localStorage.setItem('@' + item, getTimestump());
-//            }
-//        })
-//    },
-//    'get': function(address){
-//        return JSON.parse(localStorage.getItem(address));
-//    },
-//    'ts': function(address){
-//        return localStorage.getItem('@' + address);
-//    },
-//    'update': function(address, data){
-//        localStorage.setItem(address, JSON.stringify(data));
-//        localStorage.setItem('@' + address, getTimestump());
-//        return true;
-//    }
-//}
-
-//// Старое
-
-//function getTimestump(){
-//    var time = new Date();
-//    return time.getTime();
-//}
-//
-//// Разделение чисел на разряды
-//function numderTypo(input){
-//    var output = '';
-//
-//    if(input && input != ''){
-//        var numbers = String(input);
-//        numbers = numbers.split('');
-//
-//        for(n = numbers.length - 1; n >= 0; n--){
-//            output = numbers[n] + output;
-//            if((numbers.length - n) % 3 == 0)
-//                output = ' ' + output;
-//        }
-//    }
-//
-//    return output;
-//}
-//
-//function timeTypo(input){
-//    var
-//        hours = Math.floor(input/60),
-//        minutes = input - hours*60,
-//        output = '';
-//
-//    if(hours)
-//        output += plural_ru(hours, 'час', 'часа', 'часов') + (minutes ? ' ' : '');
-//
-//    if(minutes)
-//        output += plural_ru(minutes, 'минута', 'минуты', 'минут');
-//
-//    return output;
-//}
-//
-//
-//function getWindowParams(){
-//    var sizes = {};
-//    sizes.x = (window.pageXOffset !== undefined) ? window.pageXOffset :
-//        (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-//    sizes.y = (window.pageYOffset !== undefined) ? window.pageYOffset :
-//        (document.documentElement || document.body.parentNode || document.body).scrollTop;
-//    sizes.w = ('innerWidth' in window) ? window.innerWidth :
-//        document.documentElement.clientWidth
-//    sizes.h = ('innerWidth' in window) ? window.innerHeight :
-//        document.documentElement.clientHeight;
-//    return sizes;
-//}
-//
-//Element.prototype.getOffset = function(){
-//    var boundingClientRect = this.getBoundingClientRect();
-//
-//    // NOTE: Для ie8 может понадобиться полифилл (лучше отдельным файлом)
-//    return {
-//        top: boundingClientRect.top + window.pageYOffset,
-//        left: boundingClientRect.left + window.pageXOffset,
-//        width: boundingClientRect.width,
-//        height: boundingClientRect.height
-//    }
-//};
-
 // Перебор массива
 // Если обратная функция возвращает true, перебор прерывается.
 // Если третий аргумент функция — то она выполяется после перебора массива,
 //     если обратная функция ниразу не возвращала true
 // Если последний элемент === true, перебор производится в обратном порядке.
-kenzo.each = function(array, callback){
+kk.each = function(array, callback){
     var kenzo = kk,
         args = arguments,
         reverse,
@@ -262,7 +101,12 @@ kenzo.each = function(array, callback){
 if (typeof kk.r.each === kenzo._u)
     kk.r.each = kk.each;
 
-kenzo.class = function(element, classes, mask){
+kk.ts = function(){
+    var time = new Date();
+    return time.getTime();
+}
+
+kk.class = function(element, classes, mask){
     var kenzo = kk,
         each = kenzo.each,
         abort;
@@ -312,7 +156,142 @@ kenzo.class = function(element, classes, mask){
         kenzo.__a();
 }
 
-kenzo.i8to2 = function(int8){
+kk.event = (function(){
+    var _ = {},
+        create_event = document.createEvent;
+
+    _.resize = function(delay){
+        if (typeof create_event == kk._f){
+            var event = create_event('Event');
+            event.initEvent('resize', true, true);
+            window.dispatchEvent(event);
+        }
+    }
+
+    _.stop = function(event){
+        event = event || window.event;
+
+        if (!event)
+            return false;
+
+        while (event.originalEvent){
+            event = event.originalEvent
+        }
+
+        if (event.preventDefault)
+            event.preventDefault();
+        if (event.stopPropagation)
+            event.stopPropagation();
+
+        event.cancelBubble = true;
+
+        return false;
+    }
+
+    return _;
+
+})();
+
+kk.format = function(){
+    var kenzo = kk,
+        _ = {};
+
+    // Российские номера
+    _.phone = function(){
+        if (arguments.length === 0) return false;
+        if (typeof arguments[0] !== 'string') return false;
+
+        var
+            string = arguments[0],
+            number = string
+                .replace(/[^\d\+]/g, '')
+                .match(/^(?:\+7|8)([\d]{10})/);
+
+        if (number === null) return false;
+        number = number[1];
+
+        return '+7 ('
+            + number.slice(0, 3) + ') '
+            + number.slice(3, 6) + '-'
+            + number.slice(6, 8) + '-'
+            + number.slice(8, 10);
+    }
+
+
+}
+
+//kenzo.num_to_ru = function(n){
+//    if (typeof n == 'number')
+//        return n.toString().replace(/\./,',');
+//    if (typeof n == 'string')
+//        return n.replace(/\./,',');
+//}
+
+//// Старое
+//// Разделение чисел на разряды
+//function numderTypo(input){
+//    var output = '';
+//
+//    if(input && input != ''){
+//        var numbers = String(input);
+//        numbers = numbers.split('');
+//
+//        for(n = numbers.length - 1; n >= 0; n--){
+//            output = numbers[n] + output;
+//            if((numbers.length - n) % 3 == 0)
+//                output = ' ' + output;
+//        }
+//    }
+//
+//    return output;
+//}
+//
+//function timeTypo(input){
+//    var
+//        hours = Math.floor(input/60),
+//        minutes = input - hours*60,
+//        output = '';
+//
+//    if(hours)
+//        output += plural_ru(hours, 'час', 'часа', 'часов') + (minutes ? ' ' : '');
+//
+//    if(minutes)
+//        output += plural_ru(minutes, 'минута', 'минуты', 'минут');
+//
+//    return output;
+//}
+
+kk.get_offset = function(element){
+    var boundingClientRect = element.getBoundingClientRect();
+
+    // NOTE: Для ie8 может понадобиться полифилл
+    return {
+        top: boundingClientRect.top + window.pageYOffset,
+        left: boundingClientRect.left + window.pageXOffset,
+        width: boundingClientRect.width,
+        height: boundingClientRect.height
+    }
+}
+
+kk.get_window_params = function(){
+    var kenzo = kk,
+        root = window,
+        doc = document,
+        doc_elem = doc.documentElement,
+        sizes = {};
+
+    sizes.x = (root.pageXOffset !== kenzo._u) ? root.pageXOffset :
+        (doc_elem || doc.body.parentNode || doc.body).scrollLeft;
+    sizes.y = (root.pageYOffset !== kenzo._u) ? root.pageYOffset :
+        (doc_elem || doc.body.parentNode || doc.body).scrollTop;
+
+    sizes.w = ('innerWidth' in root) ? root.innerWidth : doc_elem.clientWidth;
+    sizes.h = ('innerWidth' in root) ? root.innerHeight : doc_elem.clientHeight;
+
+    return sizes;
+}
+
+kk.i8to2 = function(int8){
     var _ = int8.toString(2);
     while (_.length < 8){
         _ = '0' + _;
@@ -320,15 +299,15 @@ kenzo.i8to2 = function(int8){
     return _;
 }
 
-kenzo.i8ArrayTo2 = function(array){
+kk.i8ArrayTo2 = function(array){
     var _ = '';
     kk.each (array, function(item){
-        _ += kenzo.i8to2(item);
+        _ += kk.i8to2(item);
     });
     return _;
 }
 
-kenzo.i8ArrayToString = function(array){
+kk.i8ArrayToString = function(array){
     var _ = '';
     kk.each (array, function(item){
         _ += String.fromCharCode(item);
@@ -336,7 +315,59 @@ kenzo.i8ArrayToString = function(array){
     return _;
 }
 
-kenzo.plural = function(){
+kk.is_nodes = function(){
+    var arg = arguments[0];
+
+    if ((typeof StaticNodeList == kk._o) && (arg instanceof StaticNodeList))
+        if (arg.length > 0)
+            return true;
+        else
+            return false;
+
+    if (arg instanceof kk._NL)
+        if (arg.length > 0)
+            return true;
+        else
+            return false;
+}
+
+// Локальное хранилище
+kk.ls = (function(){
+    var kenzo = kk,
+        ls = localStorage,
+        ls_get = ls.getItem,
+        ls_set = ls.setItem,
+        _ = {};
+
+    _.create = function(){
+        kk.each (arguments, function(item){
+            if ((typeof item == kenzo._s) && (!ls_get(item))){
+                ls_set(item, JSON.stringify([]));
+                ls_set('@' + item, kenzo.ts());
+            }
+        })
+    }
+
+    _.get = function(address){
+        return JSON.parse(ls_get(address));
+    }
+
+    _.ts = function(address){
+        return ls_get('@' + address);
+    }
+
+    _.update = function(address, data){
+        ls_set(address, JSON.stringify(data));
+        ls_set('@' + address, kenzo.ts());
+
+        return true;
+    }
+
+    return _;
+
+})();
+
+kk.plural = function(){
     // TODO: Для других языков.
 
     var kenzo = kk,
@@ -412,7 +443,7 @@ kenzo.plural = function(){
  * param {Number} Максимальное значение
  * @returns {Number} Случайное число из заданного диапазона
  */
-kenzo.rand = function(){
+kk.rand = function(){
     var kenzo = kk,
         args = arguments,
         min,
@@ -448,13 +479,3 @@ kenzo.rand = function(){
     } else
         kenzo.__a();
 };
-
-kenzo.stop_event = function(event){
-    event = event || window.event;
-    if (!event) return false;
-    while (event.originalEvent){event = event.originalEvent}
-    if (event.preventDefault) event.preventDefault();
-    if (event.stopPropagation) event.stopPropagation();
-    event.cancelBubble = true;
-    return false;
-}

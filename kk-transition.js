@@ -1,8 +1,17 @@
 if (typeof kenzo === 'object'){
+
+    var plural_ru = kenzo.plural, // ангажемент, атмр, романтик саунд
+        toggle_class = kenzo.toggle_class,
+        getRandomInt = kenzo.rand,
+        getWindowParams = kenzo.get_window_params,
+        getTimestump = kk.ts;
+
     kenzo.plural_ru = kenzo.plural; // СПК
-    var plural_ru = kenzo.plural; // ангажемент, атмр, романтик саунд
-    var toggle_class = kenzo.toggle_class;
-    var getRandomInt = kenzo.rand;
+    kenzo.generate = kenzo.event;
+
+    Element.prototype.getOffset = function(){
+        kenzo.get_offset(this);
+    };
 
     kenzo.toggle_class = function(element, classes, classlist, toggle_exist){
         var kenzo = kk,

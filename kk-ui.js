@@ -1,3 +1,13 @@
+//kenzo.browser = (function(){
+//    if ('transform' in document.body.style)
+//        return 'normal';
+//    else if ('webkitTransform' in document.body.style)
+//        return 'webkit';
+//    else
+//        return 'old';
+//})();
+
+
 //kenzo.toplayer = (function(){
 //    var _ = {},
 //        top_layer = document.querySelector('.layout-top-layer');
@@ -577,7 +587,7 @@
 //                panel.dom.style.height = _.height.value + _.height.units;
 //                panel.update.height = false;
 //            } else if (_.height.units === '%'){
-//                panel.dom.style.height = getWindowParams().h / 100 * _.height.value + 'px';
+//                panel.dom.style.height = kenzo.get_window_params().h / 100 * _.height.value + 'px';
 //            }
 //        }
 //    }
@@ -592,7 +602,7 @@
 //            };
 //
 //        if (panel.anchor instanceof Element)
-//            var anchor = panel.anchor.getOffset();
+//            var anchor = kenzo.get_offset(panel.anchor);
 //
 //        if (_.width && _.width.value > 0){
 //
@@ -603,8 +613,8 @@
 //
 //        // NOTE: временно
 //        if (panel.options.temp_center){
-//            var scroll_top = getWindowParams().y,
-//                client_height = getWindowParams().h;
+//            var scroll_top = kenzo.get_window_params().y,
+//                client_height = kenzo.get_window_params().h;
 //
 //            panel.dom.style.left = '50%';
 //            panel.dom.style.top = scroll_top
@@ -634,10 +644,10 @@
 //    }
 //
 //    var update_pointer = function(panel){
-//        var panel_offset = panel.dom.getOffset();
+//        var panel_offset = kenzo.get_offset(panel.dom);
 //
 //        if (panel.anchor instanceof Element)
-//            var anchor = panel.anchor.getOffset();
+//            var anchor = kenzo.get_offset(panel.anchor);
 //
 //        if (anchor){
 //            if (panel.pointer){
@@ -660,7 +670,7 @@
 //            if (!panel.show) return false;
 //
 ////            if (panel.anchor instanceof Element)
-////                var anchor = panel.anchor.getOffset();
+////                var anchor = kenzo.get_offset(panel.anchor);
 ////            else
 ////                return false;
 //
