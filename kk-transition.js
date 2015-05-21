@@ -4,7 +4,8 @@ if (typeof kenzo === 'object'){
         toggle_class = kenzo.toggle_class,
         getRandomInt = kenzo.rand,
         getWindowParams = kenzo.get_window_params,
-        getTimestump = kk.ts;
+        getTimestump = kk.ts,
+        numderTypo = kk.format.number;
 
     kenzo.plural_ru = kenzo.plural; // СПК
     kenzo.generate = kenzo.event;

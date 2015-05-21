@@ -1,6 +1,6 @@
 {
     "name": "kenzo-kit",
-    "version": "0.0.3",
+    "version": "0.0.7",
     "authors": ["icw82"],
     "main": [
         "kk-core.js",

@@ -18,7 +18,8 @@ var root,
         __d: function(){cons.warn('Depricated')}
     };
 
-if (typeof window == kenzo._o && typeof Window == kenzo._f && (window instanceof Window)){
+if (typeof window == kenzo._o &&
+    (typeof Window == kenzo._f || typeof Window == kenzo._o) && (window instanceof Window)){
     root = window;
     kenzo.w = true;
 } else if (typeof global == kenzo._o){
@@ -28,16 +29,21 @@ if (typeof window == kenzo._o && typeof Window == kenzo._f && (window instanceof
 if (typeof root.document == kenzo._o)
     kenzo.d = true;
 
-if (typeof Element == kenzo._f)
+if (typeof Element == kenzo._f || typeof Element == kenzo._o)
     kenzo._E = Element;
 
-if (typeof Node == kenzo._f)
+if (typeof Node == kenzo._f || typeof Node == kenzo._o)
     kenzo._N = Node;
 
-if (typeof NodeList == kenzo._f)
+if (typeof NodeList == kenzo._f || typeof NodeList == kenzo._o)
     kenzo._NL = NodeList;
 
 root.kenzo = root.kk = kenzo;
+
+kenzo.ts = function(){
+    var time = new Date();
+    return time.getTime();
+}
 
 if (typeof module == kenzo._o && typeof module.exports == kenzo._o){
     // FUTURE: запилить для ноды
@@ -100,11 +106,6 @@ kk.each = function(array, callback){
 
 if (typeof kk.r.each === kenzo._u)
     kk.r.each = kk.each;
-
-kk.ts = function(){
-    var time = new Date();
-    return time.getTime();
-}
 
 kk.class = function(element, classes, mask){
     var kenzo = kk,
@@ -192,22 +193,48 @@ kk.event = (function(){
 
 })();
 
-kk.format = function(){
-    var kenzo = kk,
+kk.format = (function(){
+    var each = kk.each,
         _ = {};
 
+    _.number = function(string){
+        var _ = '',
+            delimiter = ' ';
+
+        if (string && string != ''){
+            var numbers = String(string);
+            numbers = numbers.split('');
+
+            each (numbers.length, function(item, i){
+                _ = numbers[i] + _;
+
+                if (i !== 0 && (numbers.length - i) % 3 === 0) {
+                    _ = delimiter + _;
+                }
+
+            }, true);
+        }
+
+        return _;
+    }
+
     // Российские номера
+    // TODO: не только российские
     _.phone = function(){
-        if (arguments.length === 0) return false;
-        if (typeof arguments[0] !== 'string') return false;
+        if (arguments.length === 0)
+            return false;
 
-        var
-            string = arguments[0],
+        if (typeof arguments[0] !== 'string')
+            return false;
+
+        var string = arguments[0],
             number = string
-                .replace(/[^\d\+]/g, '')
-                .match(/^(?:\+7|8)([\d]{10})/);
+                .replace(/[^\d]/g, '')
+                .match(/^(?:7|8)([\d]{10})/);
 
-        if (number === null) return false;
+        if (number === null)
+            return false;
+
         number = number[1];
 
         return '+7 ('
@@ -217,48 +244,14 @@ kk.format = function(){
             + number.slice(8, 10);
     }
 
-
-}
+    return _;
+})();
 
 //kenzo.num_to_ru = function(n){
 //    if (typeof n == 'number')
 //        return n.toString().replace(/\./,',');
 //    if (typeof n == 'string')
 //        return n.replace(/\./,',');
-//}
-
-//// Старое
-//// Разделение чисел на разряды
-//function numderTypo(input){
-//    var output = '';
-//
-//    if(input && input != ''){
-//        var numbers = String(input);
-//        numbers = numbers.split('');
-//
-//        for(n = numbers.length - 1; n >= 0; n--){
-//            output = numbers[n] + output;
-//            if((numbers.length - n) % 3 == 0)
-//                output = ' ' + output;
-//        }
-//    }
-//
-//    return output;
-//}
-//
-//function timeTypo(input){
-//    var
-//        hours = Math.floor(input/60),
-//        minutes = input - hours*60,
-//        output = '';
-//
-//    if(hours)
-//        output += plural_ru(hours, 'час', 'часа', 'часов') + (minutes ? ' ' : '');
-//
-//    if(minutes)
-//        output += plural_ru(minutes, 'минута', 'минуты', 'минут');
-//
-//    return output;
 //}
 
 kk.get_offset = function(element){
