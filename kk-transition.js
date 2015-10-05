@@ -1,4 +1,4 @@
-if (typeof kenzo === 'object'){
+if (typeof kenzo === 'object') {
 
     var plural_ru = kenzo.plural, // ангажемент, атмр, романтик саунд
         toggle_class = kenzo.toggle_class,
@@ -10,11 +10,11 @@ if (typeof kenzo === 'object'){
     kenzo.plural_ru = kenzo.plural; // СПК
     kenzo.generate = kenzo.event;
 
-    Element.prototype.getOffset = function(){
+    Element.prototype.getOffset = function() {
         kenzo.get_offset(this);
     };
 
-    kenzo.toggle_class = function(element, classes, classlist, toggle_exist){
+    kenzo.toggle_class = function(element, classes, classlist, toggle_exist) {
         var kenzo = kk,
             stop = false;
 
@@ -40,8 +40,8 @@ if (typeof kenzo === 'object'){
             toggle_exist = true;
 
         // Объединение классов
-        each (classes, function(cls){
-            if (typeof cls !== kenzo._s){
+        each (classes, function(cls) {
+            if (typeof cls !== kenzo._s) {
                 stop = true;
                 return false;
             }
@@ -54,7 +54,7 @@ if (typeof kenzo === 'object'){
 
         if (stop) return false;
 
-        each (classlist, function(cls){
+        each (classlist, function(cls) {
             if (toggle_exist && exist) {
                 element.classList.remove(cls);
             } else {

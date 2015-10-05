@@ -1,4 +1,4 @@
-(function(){
+(function() {
 // start ——————————————————————————————————————————————————————————————————————————————————— 100 ——|
 'use strict';
 
@@ -14,15 +14,15 @@ var root,
         _s: 'string',
         _n: 'number',
         _A: Array,
-        __a: function(){cons.error('Некорректные аргументы')},
-        __d: function(){cons.warn('Depricated')}
+        __a: function() {cons.error('Некорректные аргументы')},
+        __d: function() {cons.warn('Depricated')}
     };
 
 if (typeof window == kenzo._o &&
-    (typeof Window == kenzo._f || typeof Window == kenzo._o) && (window instanceof Window)){
+    (typeof Window == kenzo._f || typeof Window == kenzo._o) && (window instanceof Window)) {
     root = window;
     kenzo.w = true;
-} else if (typeof global == kenzo._o){
+} else if (typeof global == kenzo._o) {
     root = global;
 }
 
@@ -40,12 +40,12 @@ if (typeof NodeList == kenzo._f || typeof NodeList == kenzo._o)
 
 root.kenzo = root.kk = kenzo;
 
-kenzo.ts = function(){
+kenzo.ts = function() {
     var time = new Date();
     return time.getTime();
 }
 
-if (typeof module == kenzo._o && typeof module.exports == kenzo._o){
+if (typeof module == kenzo._o && typeof module.exports == kenzo._o) {
     // FUTURE: запилить для ноды
     module.exports = kenzo;
 }
@@ -60,7 +60,7 @@ kenzo.r = root;
 // Если третий аргумент функция — то она выполяется после перебора массива,
 //     если обратная функция ниразу не возвращала true
 // Если последний элемент === true, перебор производится в обратном порядке.
-kk.each = function(array, callback){
+kk.each = function(array, callback) {
     var kenzo = kk,
         args = arguments,
         reverse,
@@ -73,25 +73,28 @@ kk.each = function(array, callback){
     else if (typeof array === kenzo._n)
         array = Array(array);
 
-    if (typeof args[2] == kenzo._f){
+    if (typeof args[2] == kenzo._f) {
         def = args[2];
         if (args[3] === true)
             reverse = true;
-    } else if (args[2] === true){
+    } else if (args[2] === true) {
         reverse = true;
     }
 
-    if (typeof array == kenzo._o && ('length' in array) && typeof callback == kenzo._f){
+    if (
+        ((array instanceof kenzo._A) || (array instanceof kenzo._NL)) &&
+        typeof callback == kenzo._f
+    ) {
         if (reverse) {
-            for (index = array.length - 1; index >= 0; index--){
-                if (callback(array[index], index) === true){
+            for (index = array.length - 1; index >= 0; index--) {
+                if (callback(array[index], index) === true) {
                     nothing = false;
                     break;
                 }
             }
         } else {
-            for (index = 0; index < array.length; index++){
-                if (callback(array[index], index) === true){
+            for (index = 0; index < array.length; index++) {
+                if (callback(array[index], index) === true) {
                     nothing = false;
                     break;
                 }
@@ -101,48 +104,50 @@ kk.each = function(array, callback){
         if (nothing && typeof def == kenzo._f) {
             def();
         }
+    } else if (typeof def == kenzo._f) {
+        def();
     }
 };
 
 if (typeof kk.r.each === kenzo._u)
     kk.r.each = kk.each;
 
-kk.class = function(element, classes, mask){
+kk.class = function(element, classes, mask) {
     var kenzo = kk,
         each = kenzo.each,
         abort;
 
-    if (element instanceof kenzo._E){
+    if (element instanceof kenzo._E) {
         if (typeof classes == kenzo._s)
             classes = [classes];
 
-        each (classes, function(c){
-            if (typeof c != kenzo._s){
+        each (classes, function(c) {
+            if (typeof c != kenzo._s) {
                 abort = true;
                 return true;
             }
         });
 
-        if (!abort && classes instanceof kenzo._A){
+        if (!abort && classes instanceof kenzo._A) {
             if (typeof mask == kenzo._u)
                 mask = [];
 
-            if (mask instanceof kenzo._A){
-                each (mask, function(c){
-                    if (typeof c != kenzo._s){
+            if (mask instanceof kenzo._A) {
+                each (mask, function(c) {
+                    if (typeof c != kenzo._s) {
                         abort = true;
                         return true;
                     }
                 });
 
-                if (!abort){
-                    each (mask, function(c){
-                        if (classes.indexOf(c) < 0){
+                if (!abort) {
+                    each (mask, function(c) {
+                        if (classes.indexOf(c) < 0) {
                             element.classList.remove(c);
                         }
                     });
 
-                    each (classes, function(c){
+                    each (classes, function(c) {
                         element.classList.add(c);
                     });
 
@@ -157,25 +162,25 @@ kk.class = function(element, classes, mask){
         kenzo.__a();
 }
 
-kk.event = (function(){
+kk.event = (function() {
     var _ = {},
         create_event = document.createEvent;
 
-    _.resize = function(delay){
-        if (typeof create_event == kk._f){
+    _.resize = function(delay) {
+        if (typeof create_event == kk._f) {
             var event = create_event('Event');
             event.initEvent('resize', true, true);
             window.dispatchEvent(event);
         }
     }
 
-    _.stop = function(event){
+    _.stop = function(event) {
         event = event || window.event;
 
         if (!event)
             return false;
 
-        while (event.originalEvent){
+        while (event.originalEvent) {
             event = event.originalEvent
         }
 
@@ -193,19 +198,19 @@ kk.event = (function(){
 
 })();
 
-kk.format = (function(){
+kk.format = (function() {
     var each = kk.each,
         _ = {};
 
-    _.number = function(string){
+    _.number = function(string) {
         var _ = '',
             delimiter = ' ';
 
-        if (string && string != ''){
+        if (string && string != '') {
             var numbers = String(string);
             numbers = numbers.split('');
 
-            each (numbers.length, function(item, i){
+            each (numbers.length, function(item, i) {
                 _ = numbers[i] + _;
 
                 if (i !== 0 && (numbers.length - i) % 3 === 0) {
@@ -220,7 +225,7 @@ kk.format = (function(){
 
     // Российские номера
     // TODO: не только российские
-    _.phone = function(){
+    _.phone = function() {
         if (arguments.length === 0)
             return false;
 
@@ -247,14 +252,14 @@ kk.format = (function(){
     return _;
 })();
 
-//kenzo.num_to_ru = function(n){
+//kenzo.num_to_ru = function(n) {
 //    if (typeof n == 'number')
 //        return n.toString().replace(/\./,',');
 //    if (typeof n == 'string')
 //        return n.replace(/\./,',');
 //}
 
-kk.get_offset = function(element){
+kk.get_offset = function(element) {
     var boundingClientRect = element.getBoundingClientRect();
 
     // NOTE: Для ie8 может понадобиться полифилл
@@ -266,7 +271,7 @@ kk.get_offset = function(element){
     }
 }
 
-kk.get_window_params = function(){
+kk.get_window_params = function() {
     var kenzo = kk,
         root = window,
         doc = document,
@@ -284,31 +289,31 @@ kk.get_window_params = function(){
     return sizes;
 }
 
-kk.i8to2 = function(int8){
+kk.i8to2 = function(int8) {
     var _ = int8.toString(2);
-    while (_.length < 8){
+    while (_.length < 8) {
         _ = '0' + _;
     }
     return _;
 }
 
-kk.i8ArrayTo2 = function(array){
+kk.i8ArrayTo2 = function(array) {
     var _ = '';
-    kk.each (array, function(item){
+    kk.each (array, function(item) {
         _ += kk.i8to2(item);
     });
     return _;
 }
 
-kk.i8ArrayToString = function(array){
+kk.i8ArrayToString = function(array) {
     var _ = '';
-    kk.each (array, function(item){
+    kk.each (array, function(item) {
         _ += String.fromCharCode(item);
     });
     return _;
 }
 
-kk.is_nodes = function(){
+kk.is_nodes = function() {
     var arg = arguments[0];
 
     if ((typeof StaticNodeList == kk._o) && (arg instanceof StaticNodeList))
@@ -325,31 +330,31 @@ kk.is_nodes = function(){
 }
 
 // Локальное хранилище
-kk.ls = (function(){
+kk.ls = (function() {
     var kenzo = kk,
         ls = localStorage,
         ls_get = ls.getItem,
         ls_set = ls.setItem,
         _ = {};
 
-    _.create = function(){
-        kk.each (arguments, function(item){
-            if ((typeof item == kenzo._s) && (!ls_get(item))){
+    _.create = function() {
+        kk.each (arguments, function(item) {
+            if ((typeof item == kenzo._s) && (!ls_get(item))) {
                 ls_set(item, JSON.stringify([]));
                 ls_set('@' + item, kenzo.ts());
             }
         })
     }
 
-    _.get = function(address){
+    _.get = function(address) {
         return JSON.parse(ls_get(address));
     }
 
-    _.ts = function(address){
+    _.ts = function(address) {
         return ls_get('@' + address);
     }
 
-    _.update = function(address, data){
+    _.update = function(address, data) {
         ls_set(address, JSON.stringify(data));
         ls_set('@' + address, kenzo.ts());
 
@@ -360,7 +365,7 @@ kk.ls = (function(){
 
 })();
 
-kk.plural = function(){
+kk.plural = function() {
     // TODO: Для других языков.
 
     var kenzo = kk,
@@ -371,19 +376,19 @@ kk.plural = function(){
         second = args[1],
         amount, singular, paucal, plural, fr;
 
-    if (typeof first == kenzo._s){
-        if (langs.indexOf(first) > -1){
+    if (typeof first == kenzo._s) {
+        if (langs.indexOf(first) > -1) {
             lang = first;
             return true;
         } else
             return false;
     }
 
-    if (typeof first == kenzo._n){
+    if (typeof first == kenzo._n) {
         amount = first;
-    } else if (first instanceof kenzo._A){
+    } else if (first instanceof kenzo._A) {
         amount = first.length;
-    } else if (typeof first == kenzo._o){
+    } else if (typeof first == kenzo._o) {
         // NOTE: Может убрать к херам?
         amount = 0;
         for (var j in first)
@@ -399,7 +404,7 @@ kk.plural = function(){
         (typeof second[0] == kenzo._s) &&
         (typeof second[1] == kenzo._s) &&
         (typeof second[2] == kenzo._s)
-    ){
+    ) {
         singular = second[0];
         paucal = second[1];
         plural = second[2];
@@ -408,7 +413,7 @@ kk.plural = function(){
         (typeof args[1] == kenzo._s) &&
         (typeof args[2] == kenzo._s) &&
         (typeof args[3] == kenzo._s)
-    ){
+    ) {
         kenzo.__d();
         return kenzo.plural(amount, [args[1], args[2], args[3]]);
     } else
@@ -436,14 +441,14 @@ kk.plural = function(){
  * param {Number} Максимальное значение
  * @returns {Number} Случайное число из заданного диапазона
  */
-kk.rand = function(){
+kk.rand = function() {
     var kenzo = kk,
         args = arguments,
         min,
         max;
 
-    if (typeof args[0] == kenzo._n){
-        if (typeof args[1] == kenzo._n){
+    if (typeof args[0] == kenzo._n) {
+        if (typeof args[1] == kenzo._n) {
             min = args[0];
             max = args[1] + 1;
 
@@ -454,7 +459,7 @@ kk.rand = function(){
             if (depth < 0)
                 depth = -depth;
 
-            if (depth < 16){
+            if (depth < 16) {
                 depth = Math.floor(depth);
 
                 if (depth === 0)
@@ -469,6 +474,6 @@ kk.rand = function(){
             } else
                 kenzo.__a();
         }
-    } else
+    } else // TODO: boolian если нет аргументов
         kenzo.__a();
 };

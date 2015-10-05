@@ -1,4 +1,4 @@
-//kenzo.browser = (function(){
+//kenzo.browser = (function() {
 //    if ('transform' in document.body.style)
 //        return 'normal';
 //    else if ('webkitTransform' in document.body.style)
@@ -8,7 +8,7 @@
 //})();
 
 
-//kenzo.toplayer = (function(){
+//kenzo.toplayer = (function() {
 //    var _ = {},
 //        top_layer = document.querySelector('.layout-top-layer');
 //
@@ -17,40 +17,40 @@
 //    var popup_layer = top_layer.querySelector('.layout-wrapper'),
 //        shadow_layer = top_layer.querySelector('.layout-top-layer__shadow');
 //
-//    if (!(popup_layer instanceof Element)){
+//    if (!(popup_layer instanceof Element)) {
 //        console.warn('Отсутсвует верхний слой');
 //        return false
 //    }
 //
-//    if (!(shadow_layer instanceof Element)){
+//    if (!(shadow_layer instanceof Element)) {
 //        console.warn('Отсутсвует затеняющий слой');
 //        return false
 //    }
 //
-//    _.show = function(show_shadow_layer){
+//    _.show = function(show_shadow_layer) {
 //        top_layer.classList.add('visible');
 //        if (show_shadow_layer === true)
 //            shadow_layer.classList.add('visible');
 //    }
 //
-//    _.hide = function(){
+//    _.hide = function() {
 //        top_layer.classList.remove('visible');
 //        shadow_layer.classList.remove('visible');
 //    }
 //
-//    _.get_popup_layer = function(){
+//    _.get_popup_layer = function() {
 //        return popup_layer;
 //    }
 //
-//    _.get_shadow_layer = function(){
+//    _.get_shadow_layer = function() {
 //        return shadow_layer;
 //    }
 //
-//    _.get_popup_layer_state = function(){
+//    _.get_popup_layer_state = function() {
 //        return top_layer.classList.contains('visible');
 //    }
 //
-//    _.get_shadow_layer_state = function(){
+//    _.get_shadow_layer_state = function() {
 //        return shadow_layer.classList.contains('visible');
 //    }
 //
@@ -59,40 +59,40 @@
 //})();
 
 // Класс .hover и .pressed всем ссылкам на один и тот же документ
-//kenzo.anchors = (function(){
+//kenzo.anchors = (function() {
 //    // TODO: 'xlink:href'
 //    var _ = {},
 //        anchors = document.querySelectorAll('a[href]');
 //
-//    _.add = function(anchor){
+//    _.add = function(anchor) {
 //        try {
 //            var url = anchor.getAttribute('href').replace(/[\n\r\b\t]/g, ''),
 //                same = document.querySelectorAll('a[href="' + url + '"]');
 //
-//            anchor.addEventListener('mouseover', function(){
-//                each (same, function(o){
+//            anchor.addEventListener('mouseover', function() {
+//                each (same, function(o) {
 //                    (o.classList.contains('hover')) || (o.classList.add('hover'))
 //                });
 //            }, false);
 //
-//            anchor.addEventListener('mouseout', function(){
-//                each (same, function(o){
+//            anchor.addEventListener('mouseout', function() {
+//                each (same, function(o) {
 //                    (o.classList.contains('hover')) && (o.classList.remove('hover'))
 //                });
 //            }, false);
 //
-//            anchor.addEventListener('mousedown', function(){
-//                each (same, function(o){
+//            anchor.addEventListener('mousedown', function() {
+//                each (same, function(o) {
 //                    (o.classList.contains('pressed')) || (o.classList.add('pressed'))
 //                });
 //            }, false);
 //
-//            anchor.addEventListener('mouseup', function(){
-//                each (same, function(o){
+//            anchor.addEventListener('mouseup', function() {
+//                each (same, function(o) {
 //                    (o.classList.contains('pressed')) && (o.classList.remove('pressed'))
 //                });
 //            }, false);
-//        } catch (e){
+//        } catch (e) {
 //            console.warn(e);
 //        }
 //    }
@@ -102,13 +102,13 @@
 //    return _;
 //})();
 //
-//kenzo.tabs = (function(){
+//kenzo.tabs = (function() {
 //    var anchors = [],
 //        panels = [],
 //        preactivated_groups = [];
 //
 //    // Индексирование якоря или панели
-//    var add = function(element){
+//    var add = function(element) {
 //        if (!(element instanceof Element)) return false;
 //
 //        var anchor_name = element.getAttribute('data-kenzo-tab-anchor'),
@@ -118,9 +118,9 @@
 //
 //        if (group_name === '') group_name = null;
 //
-//        if (anchor_name){
-//            each (anchors, function(item){
-//                if ((anchor_name === item.name) && (group_name === item.group)){
+//        if (anchor_name) {
+//            each (anchors, function(item) {
+//                if ((anchor_name === item.name) && (group_name === item.group)) {
 //                    exist = true;
 //                    item.dom.push(element);
 //                    return true;
@@ -137,17 +137,17 @@
 //            element.kenzo_group_name = group_name;
 //            element.addEventListener('click', anchor_listner);
 //
-//            if (element.classList.contains('current')){
-//                if (preactivated_groups.indexOf(group_name) > -1){
+//            if (element.classList.contains('current')) {
+//                if (preactivated_groups.indexOf(group_name) > -1) {
 //                    element.classList.remove('current');
 //                } else {
 //                    preactivated_groups.push(group_name);
 //                    show(anchor_name, group_name);
 //                }
 //            }
-//        } else if (panel_name){
-//            each (panels, function(item){
-//                if ((panel_name === item.name) && (group_name === item.group)){
+//        } else if (panel_name) {
+//            each (panels, function(item) {
+//                if ((panel_name === item.name) && (group_name === item.group)) {
 //                    exist = true;
 //                    item.dom.push(element);
 //                    return true;
@@ -162,8 +162,8 @@
 //        }
 //    }
 //
-//    var anchor_listner = function(event){
-//        var anchor_search = function(child){
+//    var anchor_listner = function(event) {
+//        var anchor_search = function(child) {
 //            if (child.getAttribute('data-kenzo-tab-anchor'))
 //                return child;
 //            else if (child.parentNode !== document.body)
@@ -176,15 +176,15 @@
 //
 //        if (!(anchor instanceof Element) || anchor.classList.contains('current')) return false;
 //
-//        each (anchors, function(item){
-//            if (item.group === group){
+//        each (anchors, function(item) {
+//            if (item.group === group) {
 //
-//                if (item.name === name){
-//                    each (item.dom, function(element){
+//                if (item.name === name) {
+//                    each (item.dom, function(element) {
 //                        element.classList.add('current');
 //                    });
 //                } else {
-//                    each (item.dom, function(element){
+//                    each (item.dom, function(element) {
 //                        element.classList.remove('current');
 //                    });
 //                }
@@ -194,20 +194,20 @@
 //        show(name, group);
 //    }
 //
-//    var show = function(name, group){
+//    var show = function(name, group) {
 //        if (typeof name != 'string') return false;
 //        if (typeof group != 'string') group = null;
 //
 //        // TODO: prev and next;
 //
-//        each (panels, function(item){
-//            if (item.group === group){
-//                if (item.name === name){
-//                    each (item.dom, function(element){
+//        each (panels, function(item) {
+//            if (item.group === group) {
+//                if (item.name === name) {
+//                    each (item.dom, function(element) {
 //                        element.classList.add('current');
 //                    });
 //                } else {
-//                    each (item.dom, function(element){
+//                    each (item.dom, function(element) {
 //                        element.classList.remove('current');
 //                    });
 //                }
@@ -299,7 +299,7 @@
 //
 //*/
 //// Только для именованных якорей и панелей
-//kenzo.popup = (function(){
+//kenzo.popup = (function() {
 //    if (!kenzo.toplayer) return false;
 //
 //    var popup_layer = kenzo.toplayer.get_popup_layer(),
@@ -331,7 +331,7 @@
 //
 //    if (!(popup_layer instanceof Element)) return false;
 //
-//    var get_option__bool = function(element, attribute, default_value){
+//    var get_option__bool = function(element, attribute, default_value) {
 //        var data = element.getAttribute(attribute);
 //
 //        if (typeof default_value == 'undefined')
@@ -345,7 +345,7 @@
 //            return default_value || false;
 //    }
 //
-//    var get_value = function(element, attribute){
+//    var get_value = function(element, attribute) {
 //        var _ = {},
 //            data = element.getAttribute(attribute);
 //
@@ -368,7 +368,7 @@
 //        return _;
 //    }
 //
-//    var get_panel_option_rel = function(panel){
+//    var get_panel_option_rel = function(panel) {
 //        var _ = {},
 //            options = ['wrapper', 'anchor', 'window'];
 //
@@ -378,10 +378,10 @@
 //        if ((x !== null) && (options.indexOf(x) === -1)) x = null;
 //        if ((y !== null) && (options.indexOf(y) === -1)) y = null;
 //
-//        if (!x || !y){
+//        if (!x || !y) {
 //            var rel = panel.getAttribute('data-rel');
 //
-//            if (rel !== null){
+//            if (rel !== null) {
 //                rel = rel
 //                    .replace(/,+/g, ' ')
 //                    .replace(/\s{2,}/g, ' ')
@@ -401,7 +401,7 @@
 //        _.y = y || (rel ? rel[1] : null);
 //
 //        // Old way
-//        if (!_.x){
+//        if (!_.x) {
 //            var left = panel.getAttribute('data-kenzo-option-left');
 //            if (left !== null) {
 //                if (left === 'true')
@@ -411,10 +411,10 @@
 //            }
 //        }
 //
-//        if (!_.y){
+//        if (!_.y) {
 //            var top = panel.getAttribute('data-kenzo-option-top');
 //
-//            if (top !== null){
+//            if (top !== null) {
 //                if (top === 'true')
 //                    _.y = 'anchor';
 //                else if (top === 'false')
@@ -429,7 +429,7 @@
 //        return _;
 //    }
 //
-//    var get_panel_option_pos = function(panel){
+//    var get_panel_option_pos = function(panel) {
 //        var _ = {},
 //            options_x = ['left', 'center', 'right'],
 //            options_y = ['top', 'center', 'bottom'];
@@ -440,10 +440,10 @@
 //        if ((x !== null) && (options_x.indexOf(x) === -1)) x = null;
 //        if ((y !== null) && (options_y.indexOf(y) === -1)) y = null;
 //
-//        if (!x || !y){
+//        if (!x || !y) {
 //            var pos = panel.getAttribute('data-pos');
 //
-//            if (pos !== null){
+//            if (pos !== null) {
 //                pos = pos
 //                    .replace(/,+/g, ' ')
 //                    .replace(/\s{2,}/g, ' ')
@@ -469,13 +469,13 @@
 //        return _;
 //    }
 //
-//    var get_panel_options = function(panel){
+//    var get_panel_options = function(panel) {
 //        var _ = {};
 //
-//        _.mutex = (function(){
+//        _.mutex = (function() {
 //            var data = panel.getAttribute('data-kenzo-option-mutex');
 //
-//            if (data){
+//            if (data) {
 //                data = data.replace(/,+/g, ' ').replace(/\s{2,}/g, ' ');
 //                return data.split(' ');
 //            }
@@ -493,7 +493,7 @@
 //
 //        _.temp_center = get_option__bool(panel, 'data-temp-center', false);
 //
-//        if (_.temp_center){
+//        if (_.temp_center) {
 //            _.rel.x = 'window';
 //            _.rel.y = 'window';
 //        }
@@ -504,7 +504,7 @@
 //        return _;
 //    }
 //
-//    var get_panel_object = function(name, panel){
+//    var get_panel_object = function(name, panel) {
 //        var stat = {
 //            'name': name,
 //            'dom': panel,
@@ -513,7 +513,7 @@
 //            'anchor_clones': [],
 //            'anchor_clones_wrapper':
 //                panel.querySelector('[data-kenzo-popup-anchor-clone="' + name + '"]'),
-//            'pointer': (function(){
+//            'pointer': (function() {
 //                return panel.querySelector('[data-kenzo-popup-pointer="' + name + '"]');
 //            })(),
 //            'options': get_panel_options(panel),
@@ -527,16 +527,16 @@
 //    };
 //
 //    // Индексирование и перемещение Панели в верхний слой
-//    var add = function(panel){
+//    var add = function(panel) {
 //        var name = panel.getAttribute('data-kenzo-popup-panel');
 //
-//        if (name !== ''){
-//            each (panels, function(item){
-//                if (item.name === name){
+//        if (name !== '') {
+//            each (panels, function(item) {
+//                if (item.name === name) {
 //                    console.warn('Две или более одноимённых панелей:', name);
 //                    return true;
 //                }
-//            }, function(){
+//            }, function() {
 //                // Если панель с таким именем ещё не индексирована, она индексируется.
 //                panels.push( get_panel_object(name, panel) );
 //            });
@@ -545,12 +545,12 @@
 //        popup_layer.appendChild(panel);
 //    }
 //
-//    var get = function(){
+//    var get = function() {
 //        var panel, name, element;
 //
 //        if (typeof arguments[0] === 'string')
 //            name = arguments[0];
-//        else if (arguments[0] instanceof Element){
+//        else if (arguments[0] instanceof Element) {
 //            element = arguments[0];
 //            name =
 //                element.getAttribute('data-kenzo-popup-anchor') ||
@@ -561,8 +561,8 @@
 //        if (!name || name === '') return panel;
 //
 //        // В Array.forEach нет остановки итерации
-//        each (panels, function(item){
-//            if (item.name === name){
+//        each (panels, function(item) {
+//            if (item.name === name) {
 //                panel = item;
 //                return true;
 //            }
@@ -571,28 +571,28 @@
 //        return panel;
 //    }
 //
-//    var update_sizes = function(panel){
+//    var update_sizes = function(panel) {
 //        var _ = {
 //            width: panel.options.width,
 //            height: panel.options.height
 //        };
 //
-//        if (panel.update.width && _.width && _.width.value > 0){
+//        if (panel.update.width && _.width && _.width.value > 0) {
 //            panel.dom.style.width = _.width.value + _.width.units;
 //            panel.update.width = false;
 //        }
 //
-//        if (panel.update.height && _.height && _.height.value > 0){
-//            if (_.height.units === 'px'){
+//        if (panel.update.height && _.height && _.height.value > 0) {
+//            if (_.height.units === 'px') {
 //                panel.dom.style.height = _.height.value + _.height.units;
 //                panel.update.height = false;
-//            } else if (_.height.units === '%'){
+//            } else if (_.height.units === '%') {
 //                panel.dom.style.height = kenzo.get_window_params().h / 100 * _.height.value + 'px';
 //            }
 //        }
 //    }
 //
-//    var update_position = function(panel){
+//    var update_position = function(panel) {
 //        var wrapper = popup_layer.getBoundingClientRect(),
 //            _ = {
 //                width: panel.options.width,
@@ -604,7 +604,7 @@
 //        if (panel.anchor instanceof Element)
 //            var anchor = kenzo.get_offset(panel.anchor);
 //
-//        if (_.width && _.width.value > 0){
+//        if (_.width && _.width.value > 0) {
 //
 //            // center top
 //            if (panel.dom.classList.contains('std'))
@@ -612,7 +612,7 @@
 //        }
 //
 //        // NOTE: временно
-//        if (panel.options.temp_center){
+//        if (panel.options.temp_center) {
 //            var scroll_top = kenzo.get_window_params().y,
 //                client_height = kenzo.get_window_params().h;
 //
@@ -621,41 +621,41 @@
 //                + ( (client_height - panel.dom.offsetHeight)/2 ) + 'px';
 //        }
 //
-////        if (_.rel.x === 'window'){ }
-////        if (_.rel.y === 'window'){ }
+////        if (_.rel.x === 'window') { }
+////        if (_.rel.y === 'window') { }
 //
-//        if ((_.rel.x === 'anchor') && anchor){
+//        if ((_.rel.x === 'anchor') && anchor) {
 //            var left = anchor.left - wrapper.left + anchor.width/2;
 //            panel.dom.style.left = left + 'px';
 //            var panel_left = panel.dom.getBoundingClientRect().left - wrapper.left;
 //
-//            if (panel_left + panel.dom.offsetWidth > wrapper.width - 10){
+//            if (panel_left + panel.dom.offsetWidth > wrapper.width - 10) {
 //                panel.dom.style.removeProperty('left');
 //                panel.dom.style.right = '10px';
-//            } else if (panel_left < 10){
+//            } else if (panel_left < 10) {
 //                panel.dom.style.left = Math.round(panel.dom.offsetWidth/2) + 10 + 'px';
 //            }
 //        }
 //
-//        if ((_.rel.y === 'anchor') && anchor){
+//        if ((_.rel.y === 'anchor') && anchor) {
 //            var top = anchor.top + anchor.height;
 //            panel.dom.style.top = top + 'px';
 //        }
 //    }
 //
-//    var update_pointer = function(panel){
+//    var update_pointer = function(panel) {
 //        var panel_offset = kenzo.get_offset(panel.dom);
 //
 //        if (panel.anchor instanceof Element)
 //            var anchor = kenzo.get_offset(panel.anchor);
 //
-//        if (anchor){
-//            if (panel.pointer){
+//        if (anchor) {
+//            if (panel.pointer) {
 //                panel.pointer.style.left =
 //                    (anchor.left + anchor.width/2 - panel_offset.left) + 'px';
 //            }
 //
-//            if (panel.anchor_clones_wrapper){
+//            if (panel.anchor_clones_wrapper) {
 //                panel.anchor_clones_wrapper.style.left =
 //                    (anchor.left - panel_offset.left) + 'px';
 //
@@ -665,8 +665,8 @@
 //        }
 //    }
 //
-//    var update = function(){
-//        each (current, function(panel){
+//    var update = function() {
+//        each (current, function(panel) {
 //            if (!panel.show) return false;
 //
 ////            if (panel.anchor instanceof Element)
@@ -688,55 +688,55 @@
 //    // Если второй аргумент является элементом, то он указывается как якорь.
 //    // Если второй или третий аргумент имеют значение false, то якорь,
 //    // если он есть, не будет становиться активным (останется без класса .active).
-//    var show = function(){
+//    var show = function() {
 //        var panel = get(arguments[0]),
 //            active = true,
 //            anchor, current_clone;
 //
 //        if (!panel) return false;
 //
-//        if (arguments[0] instanceof Element){
+//        if (arguments[0] instanceof Element) {
 //            if (arguments[0] !== panel.dom)
 //                anchor = arguments[0];
-//        } else if (arguments[1] instanceof Element){
+//        } else if (arguments[1] instanceof Element) {
 //            anchor = arguments[1];
 //
-//            if (typeof arguments[2] == 'boolean'){
+//            if (typeof arguments[2] == 'boolean') {
 //                active = arguments[2];
 //            }
-//        } else if (typeof arguments[1] == 'boolean'){
+//        } else if (typeof arguments[1] == 'boolean') {
 //            active = arguments[1];
 //        }
 //
 //        block_hide = true;
 //
-//        if (panel.options.mutex instanceof Array){
-//            if (panel.options.mutex.indexOf('all') > -1){
-//                each (current, function(item){
+//        if (panel.options.mutex instanceof Array) {
+//            if (panel.options.mutex.indexOf('all') > -1) {
+//                each (current, function(item) {
 //                    hide(item.name);
 //                });
 //            } else {
-//                each (panel.options.mutex, function(name){
+//                each (panel.options.mutex, function(name) {
 //                    hide(name);
 //                });
 //            }
 //
 //        }
 //
-//        if (anchor){
+//        if (anchor) {
 //            panel.anchor = anchor;
 //
-//            if (panel.anchor_clones_wrapper){
+//            if (panel.anchor_clones_wrapper) {
 //                current_clone = null;
-//                each (panel.anchor_clones, function(clone){
-//                    if (clone.original === panel.anchor){
+//                each (panel.anchor_clones, function(clone) {
+//                    if (clone.original === panel.anchor) {
 //                        current_clone = clone.dom;
 //                    } else {
 //                        clone.dom.style.display = 'none';
 //                    }
 //                });
 //
-//                if (!current_clone){
+//                if (!current_clone) {
 //                    var current_clone = anchor.cloneNode(true);
 //                    current_clone = init_anchor(anchor, panel.name).clone;
 //                }
@@ -752,10 +752,10 @@
 //        panel.dom.classList.add('visible');
 //        panel.show = true;
 //
-//        each (current, function(item){
+//        each (current, function(item) {
 //            if (item == panel)
 //                return true;
-//        }, function(){
+//        }, function() {
 //            current.push(panel);
 //        });
 //
@@ -769,7 +769,7 @@
 //        if (active && anchor) anchor.classList.add('active');
 //    }
 //
-//    var hide = function(){
+//    var hide = function() {
 //        var panel = get(arguments[0]),
 //            blur = arguments[1];
 //
@@ -780,7 +780,7 @@
 //
 //        if (!panel.options.close_on_blur && blur) return false;
 //
-//        if (panel.anchor){
+//        if (panel.anchor) {
 //            panel.anchor.classList.remove('active');
 //            panel.anchor = null;
 //        }
@@ -791,7 +791,7 @@
 //        if (panel.options.modal === true)
 //            kenzo.toplayer.hide();
 //
-//        each (current, function(item, i){
+//        each (current, function(item, i) {
 //            if (item == panel)
 //                current.splice(i, 1);
 //        });
@@ -799,7 +799,7 @@
 //
 //    // FUTURE: toggle
 //
-//    var init_anchor = function(anchor){
+//    var init_anchor = function(anchor) {
 //        if (arguments[0] instanceof Element)
 //            var panel = get(arguments[0]);
 //
@@ -810,28 +810,28 @@
 //
 //        var clone;
 //
-//        var onclick = function(event){
-//            if ((panel.show === false) || (panel.anchor !== anchor)){
+//        var onclick = function(event) {
+//            if ((panel.show === false) || (panel.anchor !== anchor)) {
 //                show(anchor);
 //            } else {
 //                hide(anchor);
 //            }
 //        }
 //
-//        if (!('kz-initiated' in anchor)){
+//        if (!('kz-initiated' in anchor)) {
 //            anchor.addEventListener('click', onclick);
 //            anchor['kz-initiated'] = true;
 //        }
 //
 //        // Клонирование якоря
-//        if (panel.anchor_clones_wrapper){
+//        if (panel.anchor_clones_wrapper) {
 //            clone = anchor.cloneNode(true);
 //            var newobj = {
 //                'original': anchor,
 //                'dom': clone
 //            };
 //
-//            if (steppanel){
+//            if (steppanel) {
 //                steppanel.anchor_clones.push(newobj);
 //                steppanel.anchor_clones_wrapper.appendChild(clone);
 //            } else{
@@ -852,9 +852,9 @@
 //    each ('[data-kenzo-popup-panel]', add);
 //
 //    // Якори
-//    each ('[data-kenzo-popup-anchor]', function(item, i){
+//    each ('[data-kenzo-popup-anchor]', function(item, i) {
 //        // Костыль для инвалида IE
-//        if ((typeof item.classList === 'undefined') && (item instanceof SVGSVGElement)){
+//        if ((typeof item.classList === 'undefined') && (item instanceof SVGSVGElement)) {
 //            var wrapper = document.createElement('span');
 //            item.parentNode.insertBefore(wrapper, item);
 //            wrapper.appendChild(item);
@@ -869,7 +869,7 @@
 //
 //    // Проводники
 //    // Проводит событие 'click' в первый одноимённый якорь в элементах блока
-//    each ('[data-kenzo-popup-conductor]', function(conductor){
+//    each ('[data-kenzo-popup-conductor]', function(conductor) {
 //        var name = conductor.getAttribute('data-kenzo-popup-conductor');
 //
 //        if (name === '')
@@ -883,12 +883,12 @@
 //
 //        var anchor;
 //
-//        var search_anchor = function(node){
+//        var search_anchor = function(node) {
 //            if (anchor === document.body)
 //                return false;
 //
-//            if (name){
-//                if (node.parentNode == document.body){
+//            if (name) {
+//                if (node.parentNode == document.body) {
 //                    console.warn('kenzo.popup: Якорь не найден');
 //                    return false;
 //                }
@@ -905,48 +905,48 @@
 //
 //        search_anchor(conductor);
 //
-//        conductor.addEventListener('click', function(event){
+//        conductor.addEventListener('click', function(event) {
 //            anchor.click();
 //        });
 //    });
 //
 //    // Кнопки и другие элементы для закрытия панели
-//    each ('[data-kenzo-popup-close], [data-kenzo-popup-close-button]', function(item){
-//        item.addEventListener('click', function(){
+//    each ('[data-kenzo-popup-close], [data-kenzo-popup-close-button]', function(item) {
+//        item.addEventListener('click', function() {
 //            hide(item);
 //        });
 //    });
 //
-//    var is_popup = function(element){
-//        if (element instanceof Element){
+//    var is_popup = function(element) {
+//        if (element instanceof Element) {
 //            if (element === document.body) {
 //                return false;
 //            } else if (
 //                element.hasAttribute('data-kenzo-popup-panel') ||
 //                element.hasAttribute('data-kenzo-popup-anchor') ||
 //                element.hasAttribute('data-kenzo-popup-conductor')
-//            ){
+//            ) {
 //                return true;
-//            } else if (element.parentNode !== document.body){
+//            } else if (element.parentNode !== document.body) {
 //                return is_popup(element.parentNode);
 //            } else {
 //                return false;
 //            }
-//        } else if (element instanceof SVGElementInstance){
+//        } else if (element instanceof SVGElementInstance) {
 //            return is_popup(element.correspondingUseElement);
 //        }
 //    }
 //
 //    // Закрытие всех панелей по щелчку вне их;
-//    document.addEventListener('click', function(event){
-//        if (block_hide){
+//    document.addEventListener('click', function(event) {
+//        if (block_hide) {
 //            block_hide = false;
 //            return false;
 //        }
 //
-//        if ((current.length > 0) && (!is_popup(event.target))){
+//        if ((current.length > 0) && (!is_popup(event.target))) {
 //            var len = current.length;
-//            for (len; len > 0; len--){
+//            for (len; len > 0; len--) {
 //                hide(current[0].name, true);
 //            }
 //        }
@@ -990,7 +990,7 @@
 //    slider → prev, next, indicator
 //
 //*/
-//kenzo.slider = (function(){
+//kenzo.slider = (function() {
 //    var model = [],
 //        defaults = {
 //            'flipspeed': .4,
@@ -1000,7 +1000,7 @@
 //            'user_pause': 30
 //        };
 //
-//    var add = function(block){
+//    var add = function(block) {
 //
 //        if (!(block instanceof Element) || (!block.classList.contains('kenzo-slider')))
 //            return false;
@@ -1013,7 +1013,7 @@
 //
 //        var items = container.querySelectorAll('.kenzo-slider__item');
 //
-//        if (!kenzo.is_nodes(items)){
+//        if (!kenzo.is_nodes(items)) {
 //            console.warn('Отсутсвуют элементы', block);
 //            return false;
 //        }
@@ -1034,10 +1034,10 @@
 //                'distribution':
 //                    parseInt(block.getAttribute('data-distribution')) || defaults.distribution
 //            },
-//            options = (function(){
+//            options = (function() {
 //                var options = block.getAttribute('data-options');
 //
-//                if ((typeof options == 'string') && (options !== "")){
+//                if ((typeof options == 'string') && (options !== "")) {
 //                    options = options
 //                        .replace(/(?:^|\s)([^_a-zA-Z][\w\-]*)/g, '')
 //                        .trim();
@@ -1053,11 +1053,11 @@
 //
 //        // Распределение элементов по слайдам
 //        // Не пересчитывается при изменении размера рамки.
-//        if (settings.distribution > 0){
+//        if (settings.distribution > 0) {
 //            var wrapper = document.createDocumentFragment(),
 //                number_of_slides = Math.ceil(items.length / settings.distribution);
 //
-//            for (var slide_index = 0; slide_index < number_of_slides; slide_index++){
+//            for (var slide_index = 0; slide_index < number_of_slides; slide_index++) {
 //                var slide = document.createElement('div');
 //                slide.classList.add('kenzo-slider__slide');
 //
@@ -1066,7 +1066,7 @@
 //                    (item_index < (slide_index + 1) * settings.distribution)
 //                        && (item_index < items.length);
 //                    item_index++
-//                ){
+//                ) {
 //                    slide.appendChild(items[item_index]);
 //                }
 //
@@ -1075,19 +1075,19 @@
 //            }
 //            container.appendChild(wrapper);
 //
-//        } else if (settings.base_width > 0){
+//        } else if (settings.base_width > 0) {
 //            var width_sum = 0,
 //                stack = [],
 //                wrapper = document.createDocumentFragment();
 //
-//            each (items, function(item, i){
+//            each (items, function(item, i) {
 //                stack.push(item);
 //                width_sum += item.offsetWidth;
 //
 //                if (
 //                    (i + 1 === items.length) ||
 //                    (width_sum + items[i + 1].offsetWidth > settings.base_width)
-//                ){
+//                ) {
 //                    var
 //                        k = width_sum / settings.base_width,
 //                        slide = document.createElement('div');
@@ -1096,7 +1096,7 @@
 //                    if (k < .85)
 //                        width_sum = Math.round(settings.base_width * .95);
 //
-//                    each (stack, function(e){
+//                    each (stack, function(e) {
 //                        e.style.width = (Math.floor(e.offsetWidth/width_sum*10000) / 100) + '%';
 //                        slide.appendChild(e);
 //                    });
@@ -1118,14 +1118,14 @@
 //        }
 //
 //        // Индикаторы
-//        if (kenzo.is_nodes(controls.indicators)){
-//            for (var i = slides.length; i < controls.indicators.length; i++){
+//        if (kenzo.is_nodes(controls.indicators)) {
+//            for (var i = slides.length; i < controls.indicators.length; i++) {
 //                controls.indicators[i].parentNode.removeChild(controls.indicators[i]);
 //            }
 //
 //            var wrapper = document.createDocumentFragment();
 //
-//            for (var i = controls.indicators.length; i < slides.length; i++){
+//            for (var i = controls.indicators.length; i < slides.length; i++) {
 //                wrapper.appendChild( controls.indicators[0].cloneNode() );
 //            }
 //
@@ -1156,36 +1156,36 @@
 //        set_flip_interval(model[index]);
 //        set_transition(model[index]);
 //
-//        window.addEventListener('resize', function(){
+//        window.addEventListener('resize', function() {
 //            update(model[index]);
 //        });
 //
 //        if (controls.next instanceof Element)
-//            controls.next.addEventListener('click', function(){ next(model[index], 'user') });
+//            controls.next.addEventListener('click', function() { next(model[index], 'user') });
 //        if (controls.prev instanceof Element)
-//            controls.prev.addEventListener('click', function(){ prev(model[index], 'user') });
+//            controls.prev.addEventListener('click', function() { prev(model[index], 'user') });
 //
-//        each (controls.indicators, function(indicator, i){
-//            indicator.addEventListener('click', function(){ choose(model[index], i, 'user') });
+//        each (controls.indicators, function(indicator, i) {
+//            indicator.addEventListener('click', function() { choose(model[index], i, 'user') });
 //        });
 //
-//        each (slides, function(slide, i){
-//            slide.addEventListener('click', function(){ choose(model[index], i, 'user') });
+//        each (slides, function(slide, i) {
+//            slide.addEventListener('click', function() { choose(model[index], i, 'user') });
 //        })
 //    }
 //
 //    // Выбор слайда
-//    var choose = function(block, slide, source){
-//        if ((source == 'user') && (block.settings.flip_interval > 0)){
+//    var choose = function(block, slide, source) {
+//        if ((source == 'user') && (block.settings.flip_interval > 0)) {
 //            clearInterval(block.settings.flip_interval);
-//            setTimeout(function(){
+//            setTimeout(function() {
 //                set_flip_interval(block);
 //            }, defaults.user_pause * 1000);
 //        }
 //
 //        var need_update = false;
 //
-//        if (block.current !== slide){
+//        if (block.current !== slide) {
 //            block.current = slide;
 //            need_update = true;
 //        }
@@ -1193,16 +1193,16 @@
 //        need_update && update(block);
 //    }
 //
-//    var next = function(block, source){
-//        if ((block.current !== null) && (block.current + 1 < block.slides.length)){
+//    var next = function(block, source) {
+//        if ((block.current !== null) && (block.current + 1 < block.slides.length)) {
 //            choose(block, block.current + 1, source);
 //        } else {
 //            choose(block, 0, source);
 //        }
 //    }
 //
-//    var prev = function(block, source){
-//        if ((block.current !== null) && (block.current - 1 >= 0)){
+//    var prev = function(block, source) {
+//        if ((block.current !== null) && (block.current - 1 >= 0)) {
 //            choose(block, block.current - 1, source);
 //        } else {
 //            choose(block, block.slides.length - 1, source);
@@ -1210,17 +1210,17 @@
 //    }
 //
 //    // Установка периода перелистывания
-//    var set_flip_interval = function(block){
-//        if (block.settings.autoflip > 0){
+//    var set_flip_interval = function(block) {
+//        if (block.settings.autoflip > 0) {
 //            clearInterval(block.settings.flip_interval);
-//            block.settings.flip_interval = setInterval(function(){
+//            block.settings.flip_interval = setInterval(function() {
 //                next(block);
 //            }, block.settings.autoflip * 1000);
 //        }
 //    }
 //
-//    var set_transition = function(block){
-//        if (kenzo.browser === 'normal' || kenzo.browser === 'webkit'){
+//    var set_transition = function(block) {
+//        if (kenzo.browser === 'normal' || kenzo.browser === 'webkit') {
 //            block.container.style.transitionDuration = block.settings.flipspeed + 's';
 //            block.container.style.transitionTimingFunction = 'ease';
 //
@@ -1239,11 +1239,11 @@
 //        }
 //    };
 //
-//    var update = function(block){
+//    var update = function(block) {
 //        if (block.current === null) return false;
 //
 //        block.width = block.frame.offsetWidth;
-//        each (block.slides, function(slide){
+//        each (block.slides, function(slide) {
 //            slide.style.width = block.width + 'px';
 //        });
 //
@@ -1253,7 +1253,7 @@
 //
 //        // FIXME: Не учитывется поздняя загрузка изображений.
 //
-////        if (block.height > 0){
+////        if (block.height > 0) {
 ////            if (block.height > block.settings.base_max_height) {
 ////                block.height = block.settings.base_max_height
 ////            }
@@ -1268,8 +1268,8 @@
 //        )
 //            block.frame.style.fontSize = block.width / block.settings.base_width + 'em';
 //
-//        if (kenzo.is_nodes(block.controls.indicators)){
-//            each (block.controls.indicators, function(indicator, i){
+//        if (kenzo.is_nodes(block.controls.indicators)) {
+//            each (block.controls.indicators, function(indicator, i) {
 //                if (i === block.current)
 //                    indicator.classList.add('current');
 //                else
@@ -1287,8 +1287,8 @@
 //        else
 //            block.container.style.left = container_shift;
 //
-//        each (block.slides, function(slide, i){
-//            if (i === block.current){
+//        each (block.slides, function(slide, i) {
+//            if (i === block.current) {
 //                slide.classList.add('current');
 //            } else {
 //                slide.classList.remove('current');
@@ -1315,21 +1315,21 @@
 //        * должен находиться в элементе .kenzo-scroll-bar
 //
 //*/
-//kenzo.scroller = (function(){
+//kenzo.scroller = (function() {
 //    var
 //        model = [],
 //        current, current_bar, current_bar_type, last_pos;
 //
-//    var search_bar = function(child){
+//    var search_bar = function(child) {
 //        if (child.classList.contains('kenzo-scroll-bar'))
 //            return child;
 //        else if (child.parentNode !== document.body)
 //            return search_bar(child.parentNode);
 //    }
 //
-//    var mouse_capture = function(event){
+//    var mouse_capture = function(event) {
 //        if ((current !== null) && (current_bar !== null)) {
-//            if (last_pos === null){
+//            if (last_pos === null) {
 //                last_pos = event.clientX;
 //                var offset = 0;
 //            } else {
@@ -1341,7 +1341,7 @@
 //
 //            if (!current.pos) current.pos = 0;
 //
-//            if (current_bar_type == 'proportional'){
+//            if (current_bar_type == 'proportional') {
 //                current.pos = (thumb.offsetLeft - offset) /
 //                    (current_bar.offsetWidth - thumb.offsetWidth);
 //            } else {
@@ -1362,8 +1362,8 @@
 //        update(current);
 //    };
 //
-//    var stop_mouse_capture = function(){
-//        if (current !== null){
+//    var stop_mouse_capture = function() {
+//        if (current !== null) {
 //            current = null;
 //            current_bar = null;
 //            current_bar_type = null;
@@ -1374,18 +1374,18 @@
 //
 //    document.addEventListener('mouseup', stop_mouse_capture);
 //
-//    var add = function(element){
+//    var add = function(element) {
 //        if (!(element instanceof Element)) return false;
 //        var name = element.getAttribute('data-name');
 //        if (name === null) return false;
 //
 //        if (element.classList.contains('kenzo-scroll-content')) {
-//            each (model, function(item){
-//                if (item.name === name){
+//            each (model, function(item) {
+//                if (item.name === name) {
 //                    item.content.dom = element;
 //                    return true;
 //                }
-//            }, function(){
+//            }, function() {
 //                model.push({
 //                    'name': name,
 //                    'pos': 0,
@@ -1401,8 +1401,8 @@
 //                index,
 //                thumb = element.querySelector('.kenzo-scroll-thumb'),
 //                type = element.getAttribute('data-type');
-//            each (model, function(item, i){
-//                if (item.name === name){
+//            each (model, function(item, i) {
+//                if (item.name === name) {
 //                    item.bars.push({
 //                        'dom': element,
 //                        'type': type,
@@ -1414,7 +1414,7 @@
 //                    index = i;
 //                    return true;
 //                }
-//            }, function(){
+//            }, function() {
 //                if (!(thumb instanceof Element)) return false;
 //
 //                model.push({
@@ -1437,8 +1437,8 @@
 //
 //            if (index === null) return false;
 //
-//            each (model[index].bars, function(bar){
-//                bar.thumb.dom.addEventListener('mousedown', function(event){
+//            each (model[index].bars, function(bar) {
+//                bar.thumb.dom.addEventListener('mousedown', function(event) {
 //                    event.preventDefault();
 //                    current = model[index];
 //                    current_bar = search_bar(event.target);
@@ -1450,8 +1450,8 @@
 //        }
 //    }
 //
-//    var update = function(){
-//        each (model, function(){
+//    var update = function() {
+//        each (model, function() {
 //            var
 //                name = arguments[0].name,
 //                pos = arguments[0].pos,
@@ -1468,11 +1468,11 @@
 //            else
 //                var show = false;
 //
-//            if (show){
-//                if (pos === 0){
+//            if (show) {
+//                if (pos === 0) {
 //                    content.dom.classList.remove('left');
 //                    content.dom.classList.add('right');
-//                } else if (pos === 1){
+//                } else if (pos === 1) {
 //                    content.dom.classList.add('left');
 //                    content.dom.classList.remove('right');
 //                } else {
@@ -1484,11 +1484,11 @@
 //                content.dom.classList.remove('right');
 //            }
 //
-//            each (bars, function(bar){
-//                if (show){
+//            each (bars, function(bar) {
+//                if (show) {
 //                    bar.dom.classList.remove('hidden');
 //
-//                    if (bar.type == 'proportional'){
+//                    if (bar.type == 'proportional') {
 //                    //bar.thumb.width =
 //                    //    Math.round((content.dom.offsetWidth / content.dom.scrollWidth) *
 //                    //        bar.dom.offsetWidth);
