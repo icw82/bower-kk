@@ -275,7 +275,7 @@ kk.find_ancestor = function(descendant, class_name, distance) {
     if (descendant.parentNode.classList.contains(class_name))
         return descendant.parentNode;
     else
-        return this.ancestor_search(descendant.parentNode, class_name, distance);
+        return this.find_ancestor(descendant.parentNode, class_name, distance);
 }
 
 kk.format = (function() {
