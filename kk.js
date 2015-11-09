@@ -37,6 +37,9 @@ if (typeof Node == kenzo._f || typeof Node == kenzo._o)
 if (typeof NodeList == kenzo._f || typeof NodeList == kenzo._o)
     kenzo._NL = NodeList;
 
+if (typeof HTMLCollection == kenzo._f || typeof HTMLCollection == kenzo._o)
+    kenzo._C = HTMLCollection;
+
 root.kenzo = root.kk = kenzo;
 
 kenzo.ts = function() {
@@ -83,7 +86,11 @@ kk.each = function(array, callback) {
     }
 
     if (
-        ((array instanceof kenzo._A) || (array instanceof kenzo._NL)) &&
+        (
+            (array instanceof kenzo._A) ||
+            (array instanceof kenzo._NL) ||
+            (array instanceof kenzo._C)
+        ) &&
         typeof callback == kenzo._f
     ) {
         if (reverse) {
