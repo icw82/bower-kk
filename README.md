@@ -12,4 +12,4 @@ You can install this package with `bower`:
 bower install kk
 ```
 
-## [Documentation](https://github.com/icw82/kk/doc)
+## [Documentation](https://github.com/icw82/kk/tree/master/doc)
