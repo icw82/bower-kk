@@ -74,8 +74,10 @@ kk.each = function(array, callback) {
         array = document.querySelectorAll(array);
     else if (typeof array === kenzo._n)
         array = Array(Math.floor(array))
-    else if (ArrayBuffer.isView(array) && (array.lenght > 0))
+    else if (ArrayBuffer.isView(array) && (array.length > 0)) {
         array = Array.prototype.slice.call(array);
+    }
+
 
     if (typeof args[2] == kenzo._f) {
         def = args[2];
