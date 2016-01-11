@@ -66,7 +66,6 @@ kk.each = function(array, callback) {
         args = arguments,
         reverse,
         def,
-        nothing = true,
         index;
 
 //    console.log('**', array instanceof MutationRecord);
@@ -77,7 +76,6 @@ kk.each = function(array, callback) {
     else if (ArrayBuffer.isView(array) && (array.length > 0)) {
         array = Array.prototype.slice.call(array);
     }
-
 
     if (typeof args[2] == kenzo._f) {
         def = args[2];
@@ -97,25 +95,19 @@ kk.each = function(array, callback) {
     ) {
         if (reverse) {
             for (index = array.length - 1; index >= 0; index--) {
-                if (callback(array[index], index) === true) {
-                    nothing = false;
-                    break;
-                }
+                if (callback(array[index], index) === true)
+                    return true;
             }
         } else {
             for (index = 0; index < array.length; index++) {
-                if (callback(array[index], index) === true) {
-                    nothing = false;
-                    break;
-                }
+                if (callback(array[index], index) === true)
+                    return true;
             }
         }
+    }
 
-        if (nothing && typeof def == kenzo._f) {
-            def();
-        }
-    } else if (typeof def == kenzo._f) {
-        def();
+    if (typeof def == kenzo._f && def() === true) {
+        return true;
     }
 };
 
