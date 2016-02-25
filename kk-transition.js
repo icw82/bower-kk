@@ -68,3 +68,14 @@ if (typeof kenzo === 'object') {
 
     toggle_class = kenzo.toggle_class;
 }
+
+kk.get_window_params = function() {
+    console.warn('get_window_params is DEPRECATED. Use kk.viewport.');
+
+    return {
+        x: kk.viewport.x,
+        y: kk.viewport.y,
+        w: kk.viewport.w,
+        h: kk.viewport.h
+    };
+}

@@ -569,24 +569,6 @@ kk.get_offset = function(element) {
     }
 }
 
-kk.get_window_params = function() {
-    var kenzo = kk,
-        root = window,
-        doc = document,
-        doc_elem = doc.documentElement,
-        sizes = {};
-
-    sizes.x = (root.pageXOffset !== kenzo._u) ? root.pageXOffset :
-        (doc_elem || doc.body.parentNode || doc.body).scrollLeft;
-    sizes.y = (root.pageYOffset !== kenzo._u) ? root.pageYOffset :
-        (doc_elem || doc.body.parentNode || doc.body).scrollTop;
-
-    sizes.w = ('innerWidth' in root) ? root.innerWidth : doc_elem.clientWidth;
-    sizes.h = ('innerWidth' in root) ? root.innerHeight : doc_elem.clientHeight;
-
-    return sizes;
-}
-
 kk.i8to2 = function(int8) {
     var _ = int8.toString(2);
     while (_.length < 8) {
@@ -731,3 +713,112 @@ kk.plural = function() {
         else
             return plural;
 }
+
+//kk.proxy = function(/*object, [property(-ies),] callback*/) {
+//    var kenzo = kk;
+//    var args = arguments;
+//
+//    if (typeof args[0] !== kenzo._o) {
+//        kenzo.__a();
+//        return;
+//    }
+//
+//    var object = args[0];
+//
+//    // Функция вторым аргументом
+//    if (typeof args[1] === kenzo._f) {
+//        var callback = args[1];
+//
+//    // Функция третьим аргументом
+//    } else if (typeof args[2] !== kenzo._f) {
+//        var callback = args[2];
+//
+//        // Массив вторым аргументом
+//        if (args[1] instanceof kenzo._A) {
+//            kenzo.each(args[1], create);
+//
+//        } else {
+//            create(args[1]);
+//        }
+//    } else {
+//        kenzo.__a();
+//        return;
+//    }
+//
+//    function create(property) {
+//        // Имя свойства указано
+//        if (typeof property === kenzo._s) {
+//
+//
+//        } else {
+//            kenzo.__a();
+//            return;
+//        }
+//    }
+//
+//    return true;
+//
+////    if (typeof property !== 'string') return;
+////
+////    var proxy_property = '_' + property;
+////
+////    object[proxy_property] = void(0);
+////
+////    Object.defineProperty(object, property, {
+////        get: function() {return object[proxy_property]},
+////        set: function(new_value) {
+////            object[proxy_property] = new_value;
+////            callback(object, property);
+////        }
+////    });
+//}
+
+kk.viewport = (function(kenzo, window, document) {
+    var root = document.documentElement;
+    var body = document.body;
+    var define = Object.defineProperty;
+    var _ = {};
+
+    if (window.pageXOffset !== kenzo._u) {
+        define(_, 'x', {
+            get: function() {
+                return window.pageXOffset
+            }
+        });
+
+        define(_, 'y', {
+            get: function() {
+                return window.pageYOffset
+            }
+        });
+
+    } else {
+        define(_, 'x', {
+            get: function() {
+                return (root || body.parentNode || body).scrollLeft
+            }
+        });
+
+        define(_, 'y', {
+            get: function() {
+                return (root || body.parentNode || body).scrollTop
+            }
+        });
+    }
+
+
+    define(_, 'w', {
+        get: function() {
+            return root.clientWidth
+        }
+    });
+
+    define(_, 'h', {
+        get: function() {
+            return root.clientHeight
+        }
+    });
+
+    return _;
+
+})(kk, window, document)
