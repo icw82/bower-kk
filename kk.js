@@ -610,40 +610,36 @@ kk.is_nodes = function() {
 }
 
 // Локальное хранилище
-kk.ls = (function() {
-    var kenzo = kk,
-        ls = localStorage,
-        ls_get = ls.getItem,
-        ls_set = ls.setItem,
-        _ = {};
+kk.ls = (function(kk, localStorage) {
+    var _ = {};
 
     _.create = function() {
         kk.each (arguments, function(item) {
-            if ((typeof item == kenzo._s) && (!ls_get(item))) {
-                ls_set(item, JSON.stringify([]));
-                ls_set('@' + item, kenzo.ts());
+            if ((typeof item == kk._s) && (!localStorage.getItem(item))) {
+                localStorage.setItem(item, JSON.stringify([]));
+                localStorage.setItem('@' + item, kk.ts());
             }
         })
     }
 
     _.get = function(address) {
-        return JSON.parse(ls_get(address));
+        return JSON.parse(localStorage.getItem(address));
     }
 
     _.ts = function(address) {
-        return ls_get('@' + address);
+        return localStorage.getItem('@' + address);
     }
 
     _.update = function(address, data) {
-        ls_set(address, JSON.stringify(data));
-        ls_set('@' + address, kenzo.ts());
+        localStorage.setItem(address, JSON.stringify(data));
+        localStorage.setItem('@' + address, kk.ts());
 
         return true;
     }
 
     return _;
 
-})();
+})(kk, localStorage);
 
 kk.plural = function() {
     // TODO: Для других языков.
