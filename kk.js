@@ -773,7 +773,9 @@ kk.viewport = (function(kenzo, window, document) {
     var root = document.documentElement;
     var body = document.body;
     var define = Object.defineProperty;
-    var _ = {};
+    var _ = {
+        root: {}
+    };
 
     if (window.pageXOffset !== kenzo._u) {
         define(_, 'x', {
@@ -802,14 +804,25 @@ kk.viewport = (function(kenzo, window, document) {
         });
     }
 
-
     define(_, 'w', {
+        get: function() {
+            return window.innerWidth
+        }
+    });
+
+    define(_, 'h', {
+        get: function() {
+            return window.innerHeight
+        }
+    });
+
+    define(_.root, 'w', {
         get: function() {
             return root.clientWidth
         }
     });
 
-    define(_, 'h', {
+    define(_.root, 'h', {
         get: function() {
             return root.clientHeight
         }
