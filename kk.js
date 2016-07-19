@@ -99,20 +99,22 @@ kk.each = function(array, callback) {
         if (reverse) {
             for (index = array.length - 1; index >= 0; index--) {
                 var result = callback(array[index], index);
-                if (typeof result !== kk._u && result !== false)
+                if (typeof result !== kenzo._u)
                     return result;
             }
         } else {
             for (index = 0; index < array.length; index++) {
                 var result = callback(array[index], index);
-                if (typeof result !== kk._u && result !== false)
+                if (typeof result !== kenzo._u)
                     return result;
             }
         }
     }
 
-    if (typeof def == kenzo._f && def() === true) {
-        return true;
+    if (typeof def == kenzo._f) {
+        var result = def()
+        if (typeof result !== kenzo._u)
+            return result;
     }
 };
 
