@@ -347,8 +347,8 @@ kk.find_ancestor = function(descendant, keys, distance) {
 
     if (kenzo.is_A(keys)) {
         return kenzo.each (keys, function(key) {
-            if (kenzo.is_s(keys))
-                return type(keys);
+            if (kenzo.is_s(key))
+                return type(key);
         });
     }
 
