@@ -337,20 +337,52 @@ kk.event = (function() {
 
 })();
 
-kk.find_ancestor = function(descendant, class_name, distance) {
-    if (typeof distance === 'number') {
-        if (distance <= 0) return false;
-        distance--;
+kk.find_ancestor = function(descendant, keys, distance) {
+    var kenzo = kk;
+    if (!kenzo.is_n(distance))
+        distance = false;
+
+    if (kenzo.is_s(keys))
+        return type(keys);
+
+    if (kenzo.is_A(keys)) {
+        return kenzo.each (keys, function(key) {
+            if (kenzo.is_s(keys))
+                return type(keys);
+        });
     }
 
-    if (!(descendant instanceof Element)) return false;
-    if (!('parentNode' in descendant)) return false;
-    if (!(descendant.parentNode instanceof Element)) return false;
+    function type(key) {
+        if (key[0] === '#')
+            return find(descendant, key.substring(1), distance, true);
+        if (key[0] === '.')
+            return find(descendant, key.substring(1), distance, false);
 
-    if (descendant.parentNode.classList.contains(class_name))
-        return descendant.parentNode;
-    else
-        return this.find_ancestor(descendant.parentNode, class_name, distance);
+        return find(descendant, key, distance, false);
+    }
+
+    function find(descendant, key, distance, type) {
+        if (distance !== false && --distance < 0)
+            return;
+
+        if (
+            kenzo.is_E(descendant) &&
+            ('parentNode' in descendant) &&
+            kenzo.is_E(descendant.parentNode)
+        ) {
+            var parent = descendant.parentNode;
+
+            if (type) {
+                if (parent.getAttribute('id') === key)
+                    return parent;
+            } else {
+                if (parent.classList.contains(key))
+                    return parent;
+            }
+
+            return find(parent, key, distance, type);
+        }
+    }
 }
 
 kk.format = (function() {
