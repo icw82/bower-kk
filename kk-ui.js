@@ -1,3 +1,6 @@
+// TODO: Классы закрытия,а не открытия.
+
+
 //kenzo.browser = (function() {
 //    if ('transform' in document.body.style)
 //        return 'normal';

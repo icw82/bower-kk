@@ -19,14 +19,18 @@ var kenzo = {
 //    _N: Node,
 //    _NL: NodeList,
 //    _C: HTMLCollection,
-    __a: function() {cons.error('Некорректные аргументы')},
-    __d: function() {cons.warn('Depricated')},
-    __ae: function() {cons.warn('Уже существует')}
 };
 
 kenzo.msg = {
-    cb: 'Обратный вызов не определён или не является функцией'
+    cb: 'Обратный вызов не определён или не является функцией',
+    ia: 'Некорректные аргументы'
 };
+
+kenzo.__a = function() {cons.error(kenzo.msg.ia)};
+kenzo.__d = function() {cons.warn('Depricated')};
+kenzo.__ae = function() {cons.warn('Уже существует')};
+
+// TODO: errors
 
 ['undefined', 'boolean', 'number', 'string', 'object', 'function'].forEach(function(s) {
     kenzo['_' + s[0]] = s;
@@ -100,11 +104,13 @@ kk.each = function() {
     var reverse = kenzo.is_b(last) ? last : false;
     var index;
     var result;
+    var pseudo = false;
 
     if (kenzo.is_s(first) && kenzo.d) {
         array = kenzo.d.querySelectorAll(first);
     } else if (kenzo.is_n(first)) {
         array = kenzo._A(Math.floor(Math.max(0, first)));
+        pseudo = true;
     } else if (ArrayBuffer.isView(first) && (first.length > 0)) {
         array = kenzo._A.prototype.slice.call(first);
     } else if (kenzo.is_A(first) || kenzo.is_NL(first) || kenzo.is_C(first)) {
@@ -114,13 +120,13 @@ kk.each = function() {
     if (array.length > 0) {
         if (reverse) {
             for (index = array.length - 1; index >= 0; index--) {
-                result = callback(array[index], index, array);
+                result = callback(pseudo ? index : array[index], index, array);
                 if (!kenzo.is_u(result))
                     return result;
             }
         } else {
             for (index = 0; index < array.length; index++) {
-                result = callback(array[index], index, array);
+                result = callback(pseudo ? index : array[index], index, array);
                 if (!kenzo.is_u(result))
                     return result;
             }
@@ -353,12 +359,13 @@ kk.find_ancestor = function(descendant, keys, distance) {
     }
 
     function type(key) {
+        var dist = distance;
         if (key[0] === '#')
-            return find(descendant, key.substring(1), distance, true);
+            return find(descendant, key.substring(1), dist, true);
         if (key[0] === '.')
-            return find(descendant, key.substring(1), distance, false);
+            return find(descendant, key.substring(1), dist, false);
 
-        return find(descendant, key, distance, false);
+        return find(descendant, key, dist, false);
     }
 
     function find(descendant, key, distance, type) {
@@ -466,20 +473,173 @@ kk.generate_key = function(length) {
     return key;
 };
 
+// TODO: возможность задавать промежутки разными способами (начало--конец, начало--длина).
+
+/*
+Examples of byte-ranges-specifier values (assuming an entity-body of
+length 10000):
+
+   - The first 500 bytes (byte offsets 0-499, inclusive):
+     bytes=0-499
+
+   - The second 500 bytes (byte offsets 500-999, inclusive):
+     bytes=500-999
+
+   - The final 500 bytes (byte offsets 9500-9999, inclusive):
+     bytes=-500
+
+   - Or bytes=9500-
+
+   - The first and last bytes only (bytes 0 and 9999):
+     bytes=0-0,-1
+
+   - Several legal but not canonical specifications of the second 500
+     bytes (byte offsets 500-999, inclusive):
+     bytes=500-600,601-999
+     bytes=500-700,601-999
+
+*/
+
 (function(kk){
 'use strict';
 
+kk.get_buffer = function(url /*[, range1[, rangeN]]*/) {
+    var ranges = kenzo._A.prototype.slice.call(arguments).splice(1);
+
+    return new Promise(function(resolve, reject) {
+        if (!kk.is_s(url))
+            throw new Error(kk.msg.ia);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+
+        if (ranges.length !== 0) {
+            var bytes = [];
+
+            ranges = ranges.map(function(item, i) {
+                if (kk.is_n(item)) {
+                    if (item >= 0) {
+                        bytes.push(item + '-');
+                    } else {
+                        bytes.push(item);
+                    }
+                    return item;
+                }
+
+                if (kk.is_A(item) &&
+                    kk.is_n(item[0]) && item[0] >= 0 &&
+                    kk.is_n(item[1]) && item[1] >= 0
+                ) {
+                    bytes.push(item[0] + '-' + item[1]);
+                    return item;
+                }
+
+                return false;
+            });
+
+            bytes = bytes.join(',');
+
+            if (bytes !== '' && bytes !== '0-') {
+                xhr.setRequestHeader('Range', 'bytes=' + bytes);
+            }
+        }
+
+        function convert_xhr(xhr) {
+            return {
+                'headers': xhr.getAllResponseHeaders(),
+                'getHeader': function(name) {
+                    return xhr.getResponseHeader(name);
+                },
+                'content': xhr.response
+            }
+        }
+
+        xhr.addEventListener('loadend', function() {
+            if (xhr.status === 200) {
+                resolve(convert_xhr(xhr));
+            } else if (xhr.status === 206) {
+                var response = [];
+
+                if (xhr.getResponseHeader('Content-Range')) {
+                    resolve(convert_xhr(xhr));
+                } else {
+                    var separator = (function(type){
+                        var out = type.match(/boundary=(.+)$/);
+                        if (out && out[1])
+                            return out[1];
+                        else
+                            return false;
+                    })(xhr.getResponseHeader('Content-Type'));
+                    var parts = get_parts(xhr.response, separator);
+
+                    kk.each (ranges, function(item) {
+                        if (item !== false) {
+                            response.push(parts.shift());
+                        } else {
+                            response.push(false);
+                        }
+                    });
+                    resolve(response);
+                }
+
+            } else {
+                console.error(xhr.status);
+                console.log('bytes >', bytes);
+                console.log('status >', xhr.status);
+                console.log('range >', xhr.getResponseHeader('Content-Type'));
+
+            }
+
+        });
+
+        xhr.responseType = 'arraybuffer';
+        xhr.send();
+
+    });
+};
+
+function get_parts(response, separator) {
+    var out = [];
+    var ranges = get_ranges(response, separator);
+
+    kk.each (ranges, function(item) {
+        var headers = '';
+        var headers_array = new Uint8Array(
+            response,
+            item.headers,
+            item.begin - 4 - item.headers
+        );
+
+        kk.each (headers_array, function(item) {
+            headers += String.fromCharCode(item);
+        });
+
+        out.push({
+            'headers': headers,
+            'getHeader': function(header) {
+                var regexp = new RegExp(header + ': (.+)');
+                var matches = this.headers.match(regexp);
+                return matches[1];
+            },
+            'content': response.slice(item.begin, item.end)
+        });
+    });
+
+    return out;
+};
+
 function get_ranges(response, separator){
-    var view = new Uint8Array(response),
-        ranges = [],
-        cur = 0;
-    // — — — — — — — — — — — — — — — indian Magic (рождённое в муках)
+    var view = new Uint8Array(response);
+    var ranges = [];
+    var cur = 0;
+    // indian Magic (рождённое в муках)
+    // Не знаю как, но это работает >__>
     // Поиск начала данных раздела
     while (cur < response.byteLength){
         if ((view[cur] === 45) && (view[cur + 1] === 45)){
             cur += 2;
 
-            for (var i = 0; i < separator.length; i++){
+            for (var i = 0; i < separator.length; i++) {
                 if (separator.charCodeAt(i) === view[cur]){
                     if (i == separator.length - 1){
                         cur++;
@@ -525,141 +685,9 @@ function get_ranges(response, separator){
             cur++;
         }
     }
-    // — — — — — — — — — — — — — — —
 
     return ranges;
 }
-
-function get_parts(response, separator){
-    var _ = [],
-        ranges = get_ranges(response, separator)
-
-    for (var i = 0; i < ranges.length; i++){
-        var headers = '',
-            headers_array = new Uint8Array(
-                response,
-                ranges[i].headers,
-                ranges[i].begin - 4 - ranges[i].headers
-            );
-
-        for (var j = 0; j < headers_array.length; j++){
-            headers += String.fromCharCode(headers_array[j]);
-        }
-
-        _.push({
-            'headers': headers,
-            'getHeader': function(header){
-                var regexp = new RegExp(header + ': (.+)'),
-                    matches = this.headers.match(regexp);
-
-                return matches[1];
-            },
-            'content': response.slice(ranges[i].begin, ranges[i].end)
-        });
-    }
-
-    return _;
-};
-
-
-kk.get_buffer = function(/* String url [, Array range], Function callback */) {
-    // Проверка
-    if (typeof arguments[0] !== 'string'){
-        console.warn('KZ: url не передан');
-        return false;
-    } else
-        var url = arguments[0];
-
-    if (arguments[1]){
-        if (typeof arguments[1] == 'function'){
-            var callback = arguments[1];
-        } else if (arguments[1] instanceof Array){
-            if (arguments[1][0] instanceof Array)
-                var ranges = arguments[1];
-            else
-                var ranges = [arguments[1]];
-
-            if (typeof arguments[2] == 'function')
-                var callback = arguments[2];
-            else {
-                console.warn('KZ: Функция обратного вызова не передана');
-                return false;
-            }
-        } else {
-            console.warn('KZ: Второй аргумент не передан');
-            return false;
-        }
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-
-    if (!ranges) {
-    // Передача файла полностью
-
-    } else if (ranges.length === 1){
-    // Передача одной части файла
-        if (ranges[0][0] < 0)
-            xhr.setRequestHeader('Range', 'bytes=' + ranges[0][0]);
-        else
-            xhr.setRequestHeader('Range', 'bytes=' + ranges[0][0] + '-' + ranges[0][1]);
-
-        xhr.onreadystatechange = function(){
-            if (xhr.readyState !== 4) return false;
-            if (xhr.status === 206){
-                var self = this;
-                callback([{
-                    'headers': self.getAllResponseHeaders(),
-                    'getHeader': function(header){
-                        return self.getResponseHeader(header);
-                    },
-                    'content': self.response
-                }]);
-            } else {
-                callback(false);
-            }
-        }
-
-    } else {
-    // Передача нескольких частей файла
-        xhr.setRequestHeader('Range', 'bytes=' + (function(){
-            ranges.forEach(function(element, index){
-                if (ranges[index][0] < 0)
-                    ranges[index] = ranges[index][0];
-                else
-                    ranges[index] = ranges[index][0] + '-' + ranges[index][1];
-            });
-            return ranges.join(',');
-        })());
-
-        xhr.onreadystatechange = function(){
-            if (xhr.readyState !== 4) return false;
-            if (xhr.status === 206){
-                var self = this;
-
-                // Разделитель
-                var separator = (function(range){
-                    var out = range.match(/boundary=(.+)$/);
-                    if (out && out[1])
-                        return out[1];
-                    else
-                        return false;
-                })(this.getResponseHeader('Content-Type'));
-
-                // Части
-                var parts = get_parts(self.response, separator);
-
-                callback(parts);
-            } else {
-                callback(false);
-            }
-        }
-    }
-
-    xhr.responseType = 'arraybuffer';
-    xhr.send(null);
-};
-
 
 })(kk);
 
