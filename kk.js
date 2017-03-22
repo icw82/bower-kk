@@ -1,13 +1,13 @@
-(function() {
 'use strict';
 
+(function() {
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.2.0',
+    v: '0.6.1',
 //    r: root // window or global
-    w: false, // window (global if not)
-    d: false, // root.document
+    w: null, // window (global if not)
+    d: null, // root.document
 //    _b: 'boolean',
 //    _u: 'undefined',
 //    _o: 'object',
@@ -32,7 +32,14 @@ kenzo.__ae = function() {cons.warn('Уже существует')};
 
 // TODO: errors
 
-['undefined', 'boolean', 'number', 'string', 'object', 'function'].forEach(function(s) {
+[
+    'undefined',
+    'boolean',
+    'number',
+    'string',
+    'object',
+    'function'
+].forEach(function(s) {
     kenzo['_' + s[0]] = s;
     kenzo['is_' + s[0]] = function(a) {return typeof a === s}
 });
@@ -58,7 +65,10 @@ if (kenzo.is_o(root.document))
     [NodeList, 'NL'],
     [HTMLCollection, 'C']
 ].forEach(function(p) {
-    if (typeof p[0] !== kenzo._u && ( kenzo.is_f(p[0]) || kenzo.is_o(p[0]) ) ) {
+    if (
+        typeof p[0] !== kenzo._u &&
+        (kenzo.is_f(p[0]) || kenzo.is_o(p[0]))
+    ) {
         kenzo['_' + p[1]] = p[0];
         kenzo['is_' + p[1]] = function(a) {return a instanceof p[0]}
     }
@@ -71,18 +81,24 @@ kenzo.ts = function() {
     return time.getTime();
 }
 
-if (typeof module !== kenzo._u && kenzo.is_o(module) && kenzo.is_o(module.exports)) {
+if (
+    typeof module !== kenzo._u &&
+    kenzo.is_o(module) &&
+    kenzo.is_o(module.exports)
+) {
     // FUTURE: запилить для ноды
     module.exports = kenzo;
 }
 
 kenzo.r = root;
 
-}());
+})();
 
+(function(kk) {
 // Перебор массива
 //
-// Перебор прерывается, eсли обратная функция возвращает значение, отличное от undefined и false.
+// Перебор прерывается, eсли обратная функция возвращает значение, отличное
+// от undefined и false.
 // Если третий аргумент функция — то она выполяется после перебора массива,
 //     если обратная функция ниразу не возвращала true
 // Если последний элемент === true, перебор производится в обратном порядке.
@@ -90,30 +106,29 @@ kenzo.r = root;
 // TODO: MutationRecord;
 
 kk.each = function() {
-    var kenzo = kk;
     var args = arguments;
     var array = [];
     var first = args[0];
     var callback = args[1];
 
-    if (!kenzo.is_f(callback))
+    if (!kk.is_f(callback))
         throw kk.msg.cb;
 
-    var def = kenzo.is_f(args[2]) ? args[2] : false;
+    var def = kk.is_f(args[2]) ? args[2] : false;
     var last = args[args.length - 1];
-    var reverse = kenzo.is_b(last) ? last : false;
+    var reverse = kk.is_b(last) ? last : false;
     var index;
     var result;
     var pseudo = false;
 
-    if (kenzo.is_s(first) && kenzo.d) {
-        array = kenzo.d.querySelectorAll(first);
-    } else if (kenzo.is_n(first)) {
-        array = kenzo._A(Math.floor(Math.max(0, first)));
+    if (kk.is_s(first) && kk.d) {
+        array = kk.d.querySelectorAll(first);
+    } else if (kk.is_n(first)) {
+        array = kk._A(Math.floor(Math.max(0, first)));
         pseudo = true;
     } else if (ArrayBuffer.isView(first) && (first.length > 0)) {
-        array = kenzo._A.prototype.slice.call(first);
-    } else if (kenzo.is_A(first) || kenzo.is_NL(first) || kenzo.is_C(first)) {
+        array = kk._A.prototype.slice.call(first);
+    } else if (kk.is_A(first) || kk.is_NL(first) || kk.is_C(first)) {
         array = first;
     }
 
@@ -121,13 +136,13 @@ kk.each = function() {
         if (reverse) {
             for (index = array.length - 1; index >= 0; index--) {
                 result = callback(pseudo ? index : array[index], index, array);
-                if (!kenzo.is_u(result))
+                if (!kk.is_u(result))
                     return result;
             }
         } else {
             for (index = 0; index < array.length; index++) {
                 result = callback(pseudo ? index : array[index], index, array);
-                if (!kenzo.is_u(result))
+                if (!kk.is_u(result))
                     return result;
             }
         }
@@ -138,103 +153,106 @@ kk.each = function() {
     }
 };
 
-if (typeof kk.r.each === kenzo._u)
+if (typeof kk.r.each === kk._u)
     kk.r.each = kk.each;
 
-/**
- * Случайное целое число
- * param {Number} Минимальное значение или разрядность слуайного числа,
- *     если не указан второй аргумент
- * param {Number} Максимальное значение
- * @returns {Number} Случайное число из заданного диапазона
- */
+})(kk);
+
+(function(kk) {
+// Случайное целое число
 kk.rand = function() {
-    var kenzo = kk,
-        args = arguments,
-        min,
-        max;
+    var args = arguments;
+    var min;
+    var max;
 
-    if (typeof args[0] == kenzo._n) {
-        if (typeof args[1] == kenzo._n) {
-            min = args[0];
-            max = args[1] + 1;
+    // Если аргументов нет — выдавать случайно true/false
+    if (!kk.is_n(args[0])) {
+        return !Math.round(Math.random())
+    }
 
-            return Math.floor( Math.random() * (max - min) ) + min;
+    // Если аргумент только один — задаёт разряд случайного числа
+    if (!kk.is_n(args[1])) {
+        var depth = Math.floor(Math.abs(args[0]));
+
+        if (depth < 16) {
+            if (depth === 0)
+                return 0;
+            else if (depth === 1)
+                min = 0;
+            else
+                min = Math.pow(10, depth - 1);
+
+            return kk.rand(min, Math.pow(10, depth) - 1);
+
         } else {
-            var depth = args[0];
-
-            if (depth < 0)
-                depth = -depth;
-
-            if (depth < 16) {
-                depth = Math.floor(depth);
-
-                if (depth === 0)
-                    return 0;
-                else if (depth === 1)
-                    min = 0;
-                else
-                    min = Math.pow(10, depth - 1);
-
-                return kenzo.rand(min, Math.pow(10, depth) - 1);
-
-            } else
-                kenzo.__a();
+            throw Error(kk.msg.ia);
         }
-    } else // TODO: boolian если нет аргументов
-        kenzo.__a();
+    }
+
+    // Если два аргумента
+    min = args[0];
+    max = args[1] + 1;
+
+    return Math.floor( Math.random() * (max - min) ) + min;
+
 };
 
+})(kk);
+
+(function(kk) {
 kk.class = function(element, classes, mask) {
-    var kenzo = kk,
-        each = kenzo.each,
-        abort;
+    var each = kk.each;
+    var error = Error(kk.msg.ia);
+    var abort;
 
-    if (element instanceof kenzo._E) {
-        if (typeof classes == kenzo._s)
-            classes = [classes];
+    if (!kenzo.is_E(element))
+        throw error;
 
-        each (classes, function(c) {
+    if (kk.is_s(classes))
+        classes = [classes];
+
+    if (!kk.is_A(classes))
+        throw error;
+
+    classes.forEach(function(item) {
+        if (!kk.is_s(item))
+            throw error;
+    });
+
+    if (typeof mask == kenzo._u)
+        mask = [];
+
+    if (mask instanceof kenzo._A) {
+        each (mask, function(c) {
             if (typeof c != kenzo._s) {
                 abort = true;
                 return true;
             }
         });
 
-        if (!abort && classes instanceof kenzo._A) {
-            if (typeof mask == kenzo._u)
-                mask = [];
+        if (!abort) {
+            each (mask, function(c) {
+                if (classes.indexOf(c) < 0) {
+                    element.classList.remove(c);
+                }
+            });
 
-            if (mask instanceof kenzo._A) {
-                each (mask, function(c) {
-                    if (typeof c != kenzo._s) {
-                        abort = true;
-                        return true;
-                    }
-                });
+            each (classes, function(c) {
+                element.classList.add(c);
+            });
 
-                if (!abort) {
-                    each (mask, function(c) {
-                        if (classes.indexOf(c) < 0) {
-                            element.classList.remove(c);
-                        }
-                    });
-
-                    each (classes, function(c) {
-                        element.classList.add(c);
-                    });
-
-                    return true;
-                } else
-                    kenzo.__a();
-            } else
-                kenzo.__a();
+            return true; // ничего не возвращать
         } else
             kenzo.__a();
     } else
         kenzo.__a();
+
+
 }
 
+})(kk);
+
+(function(kk) {
 kk.class_forever = function(class_name, element){
     element.classList.add(class_name);
 
@@ -254,6 +272,9 @@ kk.class_forever = function(class_name, element){
     //mo.disconnect();
 }
 
+})(kk);
+
+(function(kk) {
 kk.Event = function(key) {
     var kenzo = kk;
     var listeners = [];
@@ -365,6 +386,9 @@ kk.event = (function() {
 
 })();
 
+})(kk);
+
+(function(kk) {
 kk.find_ancestor = function(descendant, keys, distance) {
     var kenzo = kk;
     if (!kenzo.is_n(distance))
@@ -414,6 +438,9 @@ kk.find_ancestor = function(descendant, keys, distance) {
     }
 }
 
+})(kk);
+
+(function(kk) {
 kk.format = (function() {
     var each = kk.each,
         _ = {};
@@ -475,6 +502,9 @@ kk.format = (function() {
 //        return n.replace(/\./,',');
 //}
 
+})(kk);
+
+(function(kk) {
 kk.generate_key = function(length) {
     if (typeof length !== 'number') {
         length = 1;
@@ -495,6 +525,9 @@ kk.generate_key = function(length) {
     return key;
 };
 
+})(kk);
+
+(function(kk) {
 // TODO: возможность задавать промежутки разными способами (начало--конец, начало--длина).
 
 /*
@@ -713,10 +746,12 @@ function get_ranges(response, separator){
 
 })(kk);
 
+})(kk);
+
+(function(kk) {
 kk.get_offset = function(element) {
     var boundingClientRect = element.getBoundingClientRect();
 
-    // NOTE: Для ie8 может понадобиться полифилл
     return {
         top: boundingClientRect.top + window.pageYOffset,
         left: boundingClientRect.left + window.pageXOffset,
@@ -725,6 +760,9 @@ kk.get_offset = function(element) {
     }
 }
 
+})(kk);
+
+(function(kk) {
 kk.i8to2 = function(int8) {
     var _ = int8.toString(2);
     while (_.length < 8) {
@@ -749,6 +787,9 @@ kk.i8ArrayToString = function(array) {
     return _;
 }
 
+})(kk);
+
+(function(kk) {
 kk.is_nodes = function() {
     var arg = arguments[0];
 
@@ -765,6 +806,9 @@ kk.is_nodes = function() {
             return false;
 }
 
+})(kk);
+
+(function(kk) {
 // Локальное хранилище
 kk.ls = (function(kk, localStorage) {
     var _ = {};
@@ -797,6 +841,9 @@ kk.ls = (function(kk, localStorage) {
 
 })(kk, localStorage);
 
+})(kk);
+
+(function(kk) {
 kk.plural = function() {
     // TODO: Для других языков.
 
@@ -866,6 +913,9 @@ kk.plural = function() {
             return plural;
 }
 
+})(kk);
+
+(function(kk) {
 kk.proxy = (function(kk) {
 
     kk.ProxyStorage = function() {}
@@ -963,6 +1013,9 @@ kk.proxy = (function(kk) {
 
 })(kk);
 
+})(kk);
+
+(function(kk) {
 kk.viewport = (function(kenzo, window, document) {
     var root = document.documentElement;
     var body = document.body;
@@ -1025,3 +1078,5 @@ kk.viewport = (function(kenzo, window, document) {
     return _;
 
 })(kk, window, document)
+
+})(kk);

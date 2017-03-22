@@ -1,11 +1,11 @@
 if (typeof kenzo === 'object') {
 
-    var plural_ru = kenzo.plural, // ангажемент, атмр, романтик саунд
-        toggle_class = kenzo.toggle_class,
-        getRandomInt = kenzo.rand,
-        getWindowParams = kenzo.get_window_params,
-        getTimestump = kk.ts,
-        numderTypo = kk.format.number;
+    var plural_ru = kenzo.plural; // ангажемент, атмр, романтик саунд
+    var toggle_class = kenzo.toggle_class;
+    var getRandomInt = kenzo.rand;
+    var getWindowParams = kenzo.get_window_params;
+    var getTimestump = kk.ts;
+    var numderTypo = kk.format.number;
 
     kenzo.plural_ru = kenzo.plural; // СПК
     kenzo.generate = kenzo.event;

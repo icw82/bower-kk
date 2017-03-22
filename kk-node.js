@@ -1,13 +1,16 @@
-kenzo.path = {};
+'use strict';
 
-kenzo.path.convert = function(p) {
+(function(kk) {
+kk.path = {};
+
+kk.path.convert = function(p) {
     if (path.sep === '\\')
         return p.replace(/\\/g, '/');
     else
         return p;
 };
 
-kenzo.path.relative = function(original, root) {
+kk.path.relative = function(original, root) {
     var _ = {};
 
     for (var key in original) {
@@ -16,3 +19,5 @@ kenzo.path.relative = function(original, root) {
 
     return _;
 }
+
+})(kk);
