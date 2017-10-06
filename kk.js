@@ -4,7 +4,7 @@
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.6.1',
+    v: '0.7.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -23,12 +23,25 @@ var kenzo = {
 
 kenzo.msg = {
     cb: 'Обратный вызов не определён или не является функцией',
-    ia: 'Некорректные аргументы'
+    ia: 'Некорректные аргументы',
+    ae: 'Уже существует'
 };
 
-kenzo.__a = function() {cons.error(kenzo.msg.ia)};
+kenzo.err = {}; // errors
+
+Object.keys(kenzo.msg)
+    .forEach(function(key) {
+        kenzo.err[key] = Error(kenzo.msg[key]);
+    });
+
 kenzo.__d = function() {cons.warn('Depricated')};
-kenzo.__ae = function() {cons.warn('Уже существует')};
+
+kenzo.__a = function() {
+    cons.error(kenzo.msg.ia); kenzo.__d();
+};
+kenzo.__ae = function() {
+    cons.warn(kenzo.msg.ae); kenzo.__d();
+};
 
 // TODO: errors
 
@@ -112,7 +125,7 @@ kk.each = function() {
     var callback = args[1];
 
     if (!kk.is_f(callback))
-        throw kk.msg.cb;
+        throw kk.err.cb;
 
     var def = kk.is_f(args[2]) ? args[2] : false;
     var last = args[args.length - 1];
@@ -128,6 +141,7 @@ kk.each = function() {
         pseudo = true;
     } else if (ArrayBuffer.isView(first) && (first.length > 0)) {
         array = kk._A.prototype.slice.call(first);
+        //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
     } else if (kk.is_A(first) || kk.is_NL(first) || kk.is_C(first)) {
         array = first;
     }
@@ -166,27 +180,26 @@ kk.rand = function() {
     var max;
 
     // Если аргументов нет — выдавать случайно true/false
-    if (!kk.is_n(args[0])) {
+    if (!kk.is_n(args[0]))
         return !Math.round(Math.random())
-    }
 
     // Если аргумент только один — задаёт разряд случайного числа
     if (!kk.is_n(args[1])) {
         var depth = Math.floor(Math.abs(args[0]));
 
-        if (depth < 16) {
-            if (depth === 0)
-                return 0;
-            else if (depth === 1)
-                min = 0;
-            else
-                min = Math.pow(10, depth - 1);
+        if (depth >= 16)
+            throw kk.err.ia;
 
-            return kk.rand(min, Math.pow(10, depth) - 1);
+        if (depth === 0)
+            return 0;
 
-        } else {
-            throw Error(kk.msg.ia);
-        }
+        if (depth === 1)
+            min = 0;
+        else
+            min = Math.pow(10, depth - 1);
+
+        return kk.rand(min, Math.pow(10, depth) - 1);
+
     }
 
     // Если два аргумента
@@ -201,69 +214,53 @@ kk.rand = function() {
 
 (function(kk) {
 kk.class = function(element, classes, mask) {
-    var each = kk.each;
-    var error = Error(kk.msg.ia);
-    var abort;
-
-    if (!kenzo.is_E(element))
-        throw error;
+    if (!kk.is_E(element))
+        throw kk.err.ia;
 
     if (kk.is_s(classes))
         classes = [classes];
 
     if (!kk.is_A(classes))
-        throw error;
+        throw kk.err.ia;
+
+    if (!kk.is_A(mask))
+        mask = [];
+
+    mask.forEach(function(item) {
+        if (!kk.is_s(item))
+            throw kk.err.ia;
+    });
 
     classes.forEach(function(item) {
         if (!kk.is_s(item))
-            throw error;
+            throw kk.err.ia;
     });
 
-    if (typeof mask == kenzo._u)
-        mask = [];
+    mask.forEach(function(item) {
+        if (classes.indexOf(item) < 0) {
+            element.classList.remove(item);
+        }
+    });
 
-    if (mask instanceof kenzo._A) {
-        each (mask, function(c) {
-            if (typeof c != kenzo._s) {
-                abort = true;
-                return true;
-            }
-        });
-
-        if (!abort) {
-            each (mask, function(c) {
-                if (classes.indexOf(c) < 0) {
-                    element.classList.remove(c);
-                }
-            });
-
-            each (classes, function(c) {
-                element.classList.add(c);
-            });
-
-            return true; // ничего не возвращать
-        } else
-            kenzo.__a();
-    } else
-        kenzo.__a();
-
-
+    classes.forEach(function(item) {
+        element.classList.add(item);
+    });
 }
 
 })(kk);
 
 (function(kk) {
-kk.class_forever = function(class_name, element){
-    element.classList.add(class_name);
+kk.class_forever = function(name, element) {
+    element.classList.add(name);
 
-    var mo = new MutationObserver(function(mutations){
-        each (mutations, function(mr){
+    var mo = new MutationObserver(function(mutations) {
+        mutations.forEach(function(record) {
             if (
-                (mr.attributeName == 'class') &&
-                (mr.target == element) &&
-                !element.classList.contains(class_name)
-            ){
-                element.classList.add(class_name);
+                (record.attributeName === 'class') &&
+                (record.target === element) &&
+                !element.classList.contains(name)
+            ) {
+                element.classList.add(name);
             }
         });
     });
@@ -276,7 +273,6 @@ kk.class_forever = function(class_name, element){
 
 (function(kk) {
 kk.Event = function(key) {
-    var kenzo = kk;
     var listeners = [];
     var is_completed = false;
     var last_data;
@@ -286,13 +282,13 @@ kk.Event = function(key) {
     });
 
     this.hasListener = function(listener) {
-        return kenzo.each (listeners, function(item) {
+        return kk.each (listeners, function(item) {
             return item === listener;
         });
     }
 
     this.addListener = function(listener) {
-        if (!kenzo.is_f(listener) || this.hasListener(listener))
+        if (!kk.is_f(listener) || this.hasListener(listener))
             return;
 
         if (this.is_completed) {
@@ -303,7 +299,7 @@ kk.Event = function(key) {
     }
 
     this.removeListener = function(listener) {
-        if (!kenzo.is_f(listener))
+        if (!kk.is_f(listener))
             return;
 
         listeners = listeners.filter(function(item) {
@@ -319,7 +315,7 @@ kk.Event = function(key) {
         var args = arguments;
         var data;
 
-        if (kenzo.is_u(this.key)) {
+        if (kk.is_u(this.key)) {
             data = args[0];
         } else {
             if (this.key === args[0]) {
@@ -348,152 +344,63 @@ kk.Event = function(key) {
     }
 };
 
-
-// TODO: переработать
-kk.event = (function() {
-    var _ = {},
-        create_event = document.createEvent;
-
-    _.resize = function(delay) {
-        if (typeof create_event == kk._f) {
-            var event = create_event('Event');
-            event.initEvent('resize', true, true);
-            window.dispatchEvent(event);
-        }
-    }
-
-    _.stop = function(event) {
-        event = event || window.event;
-
-        if (!event)
-            return false;
-
-        while (event.originalEvent) {
-            event = event.originalEvent
-        }
-
-        if (event.preventDefault)
-            event.preventDefault();
-        if (event.stopPropagation)
-            event.stopPropagation();
-
-        event.cancelBubble = true;
-
-        return false;
-    }
-
-    return _;
-
-})();
-
 })(kk);
 
 (function(kk) {
 kk.find_ancestor = function(descendant, keys, distance) {
-    var kenzo = kk;
-    if (!kenzo.is_n(distance))
+    if (!kk.is_n(distance))
         distance = false;
 
-    if (kenzo.is_s(keys))
-        return type(keys);
+    if (kk.is_s(keys))
+        keys = [keys];
 
-    if (kenzo.is_A(keys)) {
-        return kenzo.each (keys, function(key) {
-            if (kenzo.is_s(key))
-                return type(key);
+    if (kk.is_A(keys)) {
+        return kk.each (keys, function(key) {
+            if (kk.is_s(key))
+                return type(descendant, key, distance);
         });
     }
+}
 
-    function type(key) {
-        var dist = distance;
-        if (key[0] === '#')
-            return find(descendant, key.substring(1), dist, true);
-        if (key[0] === '.')
-            return find(descendant, key.substring(1), dist, false);
+function type(descendant, key, distance) {
+    if (key[0] === '#')
+        return find(descendant, key.substring(1), distance, true);
+    if (key[0] === '.')
+        return find(descendant, key.substring(1), distance, false);
 
-        return find(descendant, key, dist, false);
-    }
+    return find(descendant, key, distance, false);
+}
 
-    function find(descendant, key, distance, type) {
-        if (distance !== false && --distance < 0)
-            return;
+function find(descendant, key, distance, type) {
+    if (distance !== false && --distance < 0)
+        return;
 
-        if (
-            kenzo.is_E(descendant) &&
-            ('parentNode' in descendant) &&
-            kenzo.is_E(descendant.parentNode)
-        ) {
-            var parent = descendant.parentNode;
+    if (
+        kk.is_E(descendant) &&
+        ('parentNode' in descendant) &&
+        kk.is_E(descendant.parentNode)
+    ) {
+        var parent = descendant.parentNode;
 
-            if (type) {
-                if (parent.getAttribute('id') === key)
-                    return parent;
-            } else {
-                if (parent.classList.contains(key))
-                    return parent;
-            }
-
-            return find(parent, key, distance, type);
+        if (type) {
+            if (parent.getAttribute('id') === key)
+                return parent;
+        } else {
+            if (parent.classList.contains(key))
+                return parent;
         }
+
+        return find(parent, key, distance, type);
     }
 }
 
 })(kk);
 
 (function(kk) {
-kk.format = (function() {
-    var each = kk.each,
-        _ = {};
-
-    _.number = function(string) {
-        var _ = '',
-            delimiter = ' ';
-
-        if (string && string != '') {
-            var numbers = String(string);
-            numbers = numbers.split('');
-
-            each (numbers.length, function(item, i) {
-                _ = numbers[i] + _;
-
-                if (i !== 0 && (numbers.length - i) % 3 === 0) {
-                    _ = delimiter + _;
-                }
-
-            }, true);
-        }
-
-        return _;
-    }
-
-    // Российские номера
-    // TODO: не только российские
-    _.phone = function() {
-        if (arguments.length === 0)
-            return false;
-
-        if (typeof arguments[0] !== 'string')
-            return false;
-
-        var string = arguments[0],
-            number = string
-                .replace(/[^\d]/g, '')
-                .match(/^(?:7|8)([\d]{10})/);
-
-        if (number === null)
-            return false;
-
-        number = number[1];
-
-        return '+7 ('
-            + number.slice(0, 3) + ') '
-            + number.slice(3, 6) + '-'
-            + number.slice(6, 8) + '-'
-            + number.slice(8, 10);
-    }
-
-    return _;
-})();
+kk.format = {
+    number: number,
+    phone: phone
+};
 
 //kenzo.num_to_ru = function(n) {
 //    if (typeof n == 'number')
@@ -502,33 +409,77 @@ kk.format = (function() {
 //        return n.replace(/\./,',');
 //}
 
+function number(input) {
+    if (kk.is_n(input))
+        input = String(input);
+
+    if (!kk.is_s(input) || input === '')
+        throw kk.err.ia;
+
+    var output = '';
+    var delimiter = ' ';
+
+    kk.each (input.split(''), function(item, index) {
+        output = item + output;
+
+        if (index !== 0 && (input.length - index) % 3 === 0) {
+            output = delimiter + output;
+        }
+
+    }, true);
+
+    return output;
+}
+
+// Российские номера
+// TODO: не только российские
+function phone(input) {
+    if (kk.is_n(input))
+        input = String(input);
+
+    if (!kk.is_s(input) || input === '')
+        throw kk.err.ia;
+
+    var output = '';
+    var number = input
+        .replace(/[^\d]/g, '')
+        .match(/^(?:7|8)([\d]{10})/);
+
+    if (number === null)
+        return;
+
+    number = number[1];
+
+    output = '+7 ('
+        + number.slice(0, 3) + ') '
+        + number.slice(3, 6) + '-'
+        + number.slice(6, 8) + '-'
+        + number.slice(8, 10);
+
+    return output;
+}
+
 })(kk);
 
 (function(kk) {
 kk.generate_key = function(length) {
-    if (typeof length !== 'number') {
+    var output = '';
+
+    if (!kk.is_n(length) || length < 1)
         length = 1;
-        console.warn('generate_key 1');
-    }
 
-    if (length < 1) {
-        length = 1;
-        console.warn('generate_key 2');
-    }
-
-    var key = '';
-
-    each (length, function() {
-        key += String.fromCharCode(kk.rand(19968, 40869));
+    kk.each (length, function() {
+        output += String.fromCharCode(kk.rand(19968, 40869));
     });
 
-    return key;
+    return output;
 };
 
 })(kk);
 
 (function(kk) {
-// TODO: возможность задавать промежутки разными способами (начало--конец, начало--длина).
+// TODO: возможность задавать промежутки разными способами
+//       (начало--конец, начало--длина).
 
 /*
 Examples of byte-ranges-specifier values (assuming an entity-body of
@@ -555,15 +506,13 @@ length 10000):
 
 */
 
-(function(kk){
-'use strict';
-
 kk.get_buffer = function(url /*[, range1[, rangeN]]*/) {
-    var ranges = kenzo._A.prototype.slice.call(arguments).splice(1);
+    //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
+    var ranges = kk._A.prototype.slice.call(arguments).splice(1);
 
     return new Promise(function(resolve, reject) {
         if (!kk.is_s(url))
-            throw new Error(kk.msg.ia);
+            throw kk.err.ia;
 
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -627,7 +576,7 @@ kk.get_buffer = function(url /*[, range1[, rangeN]]*/) {
                     })(xhr.getResponseHeader('Content-Type'));
                     var parts = get_parts(xhr.response, separator);
 
-                    kk.each (ranges, function(item) {
+                    ranges.forEach(function(item) {
                         if (item !== false) {
                             response.push(parts.shift());
                         } else {
@@ -642,9 +591,7 @@ kk.get_buffer = function(url /*[, range1[, rangeN]]*/) {
                 console.log('bytes >', bytes);
                 console.log('status >', xhr.status);
                 console.log('range >', xhr.getResponseHeader('Content-Type'));
-
             }
-
         });
 
         xhr.responseType = 'arraybuffer';
@@ -657,7 +604,7 @@ function get_parts(response, separator) {
     var out = [];
     var ranges = get_ranges(response, separator);
 
-    kk.each (ranges, function(item) {
+    ranges.forEach(function(item) {
         var headers = '';
         var headers_array = new Uint8Array(
             response,
@@ -665,7 +612,7 @@ function get_parts(response, separator) {
             item.begin - 4 - item.headers
         );
 
-        kk.each (headers_array, function(item) {
+        headers_array.forEach(function(item) {
             headers += String.fromCharCode(item);
         });
 
@@ -702,7 +649,8 @@ function get_ranges(response, separator){
                         if (view[cur] === 13 && view[cur + 1] === 10){
                             cur += 2;
                             if (ranges.length > 0){
-                                ranges[ranges.length - 1].end = cur - separator.length - 6;
+                                ranges[ranges.length - 1].end =
+                                    cur - separator.length - 6;
                             }
 
                             ranges.push({headers: cur});
@@ -727,7 +675,8 @@ function get_ranges(response, separator){
 
                         } else if (view[cur] === 45 && view[cur + 1] === 45){
                             // Последние два дефиса
-                            ranges[ranges.length - 1].end = cur - separator.length - 4;
+                            ranges[ranges.length - 1].end =
+                                cur - separator.length - 4;
                         }
                     }
                 } else {
@@ -743,8 +692,6 @@ function get_ranges(response, separator){
 
     return ranges;
 }
-
-})(kk);
 
 })(kk);
 
@@ -764,46 +711,33 @@ kk.get_offset = function(element) {
 
 (function(kk) {
 kk.i8to2 = function(int8) {
-    var _ = int8.toString(2);
-    while (_.length < 8) {
-        _ = '0' + _;
+    var output = int8.toString(2);
+
+    while (output.length < 8) {
+        output = '0' + output;
     }
-    return _;
+
+    return output;
 }
 
 kk.i8ArrayTo2 = function(array) {
-    var _ = '';
-    kk.each (array, function(item) {
-        _ += kk.i8to2(item);
+    var output = '';
+
+    array.forEach(function(item) {
+        output += kk.i8to2(item);
     });
-    return _;
+
+    return output;
 }
 
 kk.i8ArrayToString = function(array) {
-    var _ = '';
-    kk.each (array, function(item) {
-        _ += String.fromCharCode(item);
+    var output = '';
+
+    array.forEach(function(item) {
+        output += String.fromCharCode(item);
     });
-    return _;
-}
 
-})(kk);
-
-(function(kk) {
-kk.is_nodes = function() {
-    var arg = arguments[0];
-
-    if ((typeof StaticNodeList == kk._o) && (arg instanceof StaticNodeList))
-        if (arg.length > 0)
-            return true;
-        else
-            return false;
-
-    if (arg instanceof kk._NL)
-        if (arg.length > 0)
-            return true;
-        else
-            return false;
+    return output;
 }
 
 })(kk);
@@ -847,15 +781,14 @@ kk.ls = (function(kk, localStorage) {
 kk.plural = function() {
     // TODO: Для других языков.
 
-    var kenzo = kk,
-        lang = 'ru',
-        langs = ['ru'],
-        args = arguments,
-        first = args[0],
-        second = args[1],
-        amount, singular, paucal, plural, fr;
+    var lang = 'ru';
+    var langs = ['ru'];
+    var args = arguments;
+    var first = args[0];
+    var second = args[1];
+    var amount, singular, paucal, plural, fr;
 
-    if (typeof first == kenzo._s) {
+    if (kk.is_s(first)) {
         if (langs.indexOf(first) > -1) {
             lang = first;
             return true;
@@ -863,11 +796,11 @@ kk.plural = function() {
             return false;
     }
 
-    if (typeof first == kenzo._n) {
+    if (kk.is_n(first)) {
         amount = first;
-    } else if (first instanceof kenzo._A) {
+    } else if (first instanceof kk._A) {
         amount = first.length;
-    } else if (typeof first == kenzo._o) {
+    } else if (typeof first == kk._o) {
         // NOTE: Может убрать к херам?
         amount = 0;
         for (var j in first)
@@ -879,22 +812,22 @@ kk.plural = function() {
         amount = -amount;
 
     if (
-        (second instanceof kenzo._A) &&
-        (typeof second[0] == kenzo._s) &&
-        (typeof second[1] == kenzo._s) &&
-        (typeof second[2] == kenzo._s)
+        kk.is_A(second) &&
+        kk.is_s(second[0]) &&
+        kk.is_s(second[1]) &&
+        kk.is_s(second[2])
     ) {
         singular = second[0];
         paucal = second[1];
         plural = second[2];
 
     } else if (
-        (typeof args[1] == kenzo._s) &&
-        (typeof args[2] == kenzo._s) &&
-        (typeof args[3] == kenzo._s)
+        kk.is_s(args[1]) &&
+        kk.is_s(args[2]) &&
+        kk.is_s(args[3])
     ) {
-        kenzo.__d();
-        return kenzo.plural(amount, [args[1], args[2], args[3]]);
+//        kk.__d();
+        return kk.plural(amount, [args[1], args[2], args[3]]);
     } else
         return false;
 
@@ -916,167 +849,153 @@ kk.plural = function() {
 })(kk);
 
 (function(kk) {
-kk.proxy = (function(kk) {
+if (!kk.d) return;
 
-    kk.ProxyStorage = function() {}
+var define = Object.defineProperty;
+var body = kk.d.body;
+var viewport = {
+    body: {},
+};
 
-    var proxy_storage_name = '__proxy__';
+viewport.root = viewport.body; // DEPRECATED
+kk.viewport = viewport;
 
-    return function(/*object, [property(-ies),] callback*/) {
-        var proxy_storage;
-        var args = arguments;
-        var object = args[0];
-
-        // TODO: Добавить больше исключений
-        if (
-            typeof object !== kk._o ||
-            object instanceof kk._A ||
-            object instanceof kk._NL
-        ) {
-            kk.__a();
-            return;
+if (kk.is_n(kk.r.pageXOffset)) {
+    define(viewport, 'x', {
+        get: function() {
+            return kk.r.pageXOffset
         }
+    });
 
-        // Проверка существовоания хранилища переменных
-        if (object[proxy_storage_name] instanceof kk.ProxyStorage) {
-            proxy_storage = object[proxy_storage_name];
+    define(viewport, 'y', {
+        get: function() {
+            return kk.r.pageYOffset
         }
+    });
 
-        // Функция вторым аргументом
-        if (typeof args[1] === kk._f) {
-            var callback = args[1];
-            // Прокси для каждого ключа
-            return kk.proxy(object, Object.keys(object), callback);
-
-        // Функция третьим аргументом
-        } else if (typeof args[2] === kk._f) {
-            var callback = args[2];
-
-            // Массив вторым аргументом
-            if (args[1] instanceof kk._A) {
-                kk.each(args[1], create);
-                // TODO: Не возвращает False
-            } else {
-                if (create(args[1]) === false)
-                    return false;
-            }
-        } else {
-            kk.__a();
-            return;
+} else {
+    define(viewport, 'x', {
+        get: function() {
+            return (kk.d || body.parentNode || body).scrollLeft
         }
+    });
 
-        function create(property) {
-            // Имя свойства указано
-            if (typeof property === kk._s) {
-                if (!proxy_storage) {
-                    Object.defineProperty(object, proxy_storage_name, {
-                        enumerable: false,
-                        writable: true
-                    });
-
-                    proxy_storage = object[proxy_storage_name] = new kk.ProxyStorage;
-                }
-
-                // Проверка существования прокси
-                if (property in proxy_storage) {
-                    kk.__ae();
-                    return false;
-                }
-
-                // Cуществует ли уже такое свойство
-                if (property in object) {
-                    proxy_storage[property] = object[property];
-                    delete object[property];
-                } else {
-                    proxy_storage[property] = void(0);
-                }
-
-                // Создание прокси
-                Object.defineProperty(object, property, {
-                    enumerable: true,
-                    get: function() {return proxy_storage[property]},
-                    set: function(new_value) {
-                        proxy_storage[property] = new_value;
-                        callback(object, property);
-                    }
-                });
-
-            } else {
-                kk.__a();
-                return;
-            }
+    define(viewport, 'y', {
+        get: function() {
+            return (kk.d || body.parentNode || body).scrollTop
         }
+    });
+}
 
-        return true;
-
+define(viewport, 'w', {
+    get: function() {
+        return kk.r.innerWidth
     }
+});
 
-})(kk);
+define(viewport, 'h', {
+    get: function() {
+        return kk.r.innerHeight
+    }
+});
+
+define(viewport.body, 'w', {
+    get: function() {
+        return kk.d.clientWidth
+    }
+});
+
+define(viewport.body, 'h', {
+    get: function() {
+        return kk.d.clientHeight
+    }
+});
 
 })(kk);
 
 (function(kk) {
-kk.viewport = (function(kenzo, window, document) {
-    var root = document.documentElement;
-    var body = document.body;
-    var define = Object.defineProperty;
-    var _ = {
-        root: {}
+var proxy_storage_name = '__proxy__';
+
+kk.ProxyStorage = function() {}
+
+function process(input) {
+    var output = [];
+
+    var check_and_push = function(item) {
+        if (!~output.indexOf(item))
+            output.push(item);
     };
 
-    if (window.pageXOffset !== kenzo._u) {
-        define(_, 'x', {
-            get: function() {
-                return window.pageXOffset
-            }
-        });
+    input.forEach(function(item) {
+        if (kk.is_s(item)) {
+            check_and_push(item);
+        } else if (kk.is_A(item)) {
+            process(item).forEach(check_and_push);
+        }
+    });
 
-        define(_, 'y', {
-            get: function() {
-                return window.pageYOffset
-            }
-        });
+    return output;
+}
 
+/* object, [property(-ies),] callback */
+kk.watch = function() {
+    var properties = [].slice.call(arguments);
+    //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
+    var object = properties.shift();
+    var callback = properties.pop();
+    var proxy_storage;
+
+    // TODO: Добавить больше исключений
+    if (
+        !kk.is_o(object) ||
+        kk.is_A(object) ||
+        kk.is_NL(object) ||
+        !kk.is_f(callback)
+    )
+        throw kk.err.ia;
+
+    // Проверка существовоания хранилища переменных
+    if (object[proxy_storage_name] instanceof kk.ProxyStorage) {
+        proxy_storage = object[proxy_storage_name];
     } else {
-        define(_, 'x', {
-            get: function() {
-                return (root || body.parentNode || body).scrollLeft
-            }
+        Object.defineProperty(object, proxy_storage_name, {
+            enumerable: false,
+            writable: true
         });
 
-        define(_, 'y', {
-            get: function() {
-                return (root || body.parentNode || body).scrollTop
-            }
-        });
+        proxy_storage = object[proxy_storage_name] = new kk.ProxyStorage;
     }
 
-    define(_, 'w', {
-        get: function() {
-            return window.innerWidth
+    // Имена свойств не заданы, прокси для каждого ключа
+    if (properties.length === 0) {
+        properties = Object.keys(object);
+    } else {
+        properties = process(properties);
+    }
+
+    properties.forEach(function(property) {
+        // Проверка существования прокси
+        if (property in proxy_storage)
+            return;
+
+        // Cуществует ли уже такое свойство
+        if (property in object) {
+            proxy_storage[property] = object[property];
+            delete object[property];
+        } else {
+            proxy_storage[property] = void(0);
         }
+
+        // Создание прокси
+        Object.defineProperty(object, property, {
+            enumerable: true,
+            get: function() {return proxy_storage[property]},
+            set: function(value) {
+                proxy_storage[property] = value;
+                callback(object, property);
+            }
+        });
     });
-
-    define(_, 'h', {
-        get: function() {
-            return window.innerHeight
-        }
-    });
-
-    define(_.root, 'w', {
-        get: function() {
-            return root.clientWidth
-        }
-    });
-
-    define(_.root, 'h', {
-        get: function() {
-            return root.clientHeight
-        }
-    });
-
-    return _;
-
-})(kk, window, document)
+}
 
 })(kk);
