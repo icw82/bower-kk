@@ -73,6 +73,7 @@ if (kenzo.is_o(root.document))
 
 [
     [Array, 'A'],
+    [ArrayBuffer, 'AB'],
     [Element, 'E'],
     [Node, 'N'],
     [NodeList, 'NL'],
@@ -478,131 +479,179 @@ kk.generate_key = function(length) {
 })(kk);
 
 (function(kk) {
-// TODO: возможность задавать промежутки разными способами
-//       (начало--конец, начало--длина).
-
-/*
-Examples of byte-ranges-specifier values (assuming an entity-body of
-length 10000):
-
-   - The first 500 bytes (byte offsets 0-499, inclusive):
-     bytes=0-499
-
-   - The second 500 bytes (byte offsets 500-999, inclusive):
-     bytes=500-999
-
-   - The final 500 bytes (byte offsets 9500-9999, inclusive):
-     bytes=-500
-
-   - Or bytes=9500-
-
-   - The first and last bytes only (bytes 0 and 9999):
-     bytes=0-0,-1
-
-   - Several legal but not canonical specifications of the second 500
-     bytes (byte offsets 500-999, inclusive):
-     bytes=500-600,601-999
-     bytes=500-700,601-999
-
-*/
-
-kk.get_buffer = function(url /*[, range1[, rangeN]]*/) {
-    //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
-    var ranges = kk._A.prototype.slice.call(arguments).splice(1);
+kk.get_buffer = function(/*url, [ranges,] in_one_request =  false*/) {
+    var args = kk._A.prototype.slice.call(arguments);
 
     return new Promise(function(resolve, reject) {
-        if (!kk.is_s(url))
-            throw kk.err.ia;
+        try {
+            var url = args.shift();
+            var ranges;
+            var in_one_request = false;
 
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
+            if (args.length > 1 && kk.is_b(args[args.length - 1]))
+                in_one_request = args.pop();
 
-        if (ranges.length !== 0) {
-            var bytes = [];
+            ranges = args;
 
+            // console.log(url, ranges, in_one_request);
+
+            if (!kk.is_s(url)) {
+                reject(kk.err.ia);
+                return;
+            }
+
+            if (
+                (ranges.length === 0) ||
+                (ranges.length === 1 && ranges[0] === 0)
+            ) {
+                get_whole_file(url).then(resolve, reject);
+                return;
+            }
+
+            // Валидация запроса
             ranges = ranges.map(function(item, i) {
-                if (kk.is_n(item)) {
-                    if (item >= 0) {
-                        bytes.push(item + '-');
-                    } else {
-                        bytes.push(item);
-                    }
-                    return item;
-                }
-
-                if (kk.is_A(item) &&
-                    kk.is_n(item[0]) && item[0] >= 0 &&
-                    kk.is_n(item[1]) && item[1] >= 0
+                if (
+                    kk.is_n(item) || (
+                        kk.is_A(item) &&
+                        kk.is_n(item[0]) && item[0] >= 0 &&
+                        kk.is_n(item[1]) && item[1] >= 0
+                    )
                 ) {
-                    bytes.push(item[0] + '-' + item[1]);
                     return item;
                 }
 
+                // console.warn(kk.msg.ia, item);
                 return false;
             });
 
-            bytes = bytes.join(',');
+            // console.warn(ranges);
 
-            if (bytes !== '' && bytes !== '0-') {
-                xhr.setRequestHeader('Range', 'bytes=' + bytes);
-            }
-        }
+            if (in_one_request) {
+                // TODO: Попилить классику, если она вообще нужна
 
-        function convert_xhr(xhr) {
-            return {
-                'headers': xhr.getAllResponseHeaders(),
-                'getHeader': function(name) {
-                    return xhr.getResponseHeader(name);
-                },
-                'content': xhr.response
-            }
-        }
-
-        xhr.addEventListener('loadend', function() {
-            if (xhr.status === 200) {
-                resolve(convert_xhr(xhr));
-            } else if (xhr.status === 206) {
-                var response = [];
-
-                if (xhr.getResponseHeader('Content-Range')) {
-                    resolve(convert_xhr(xhr));
-                } else {
-                    var separator = (function(type){
-                        var out = type.match(/boundary=(.+)$/);
-                        if (out && out[1])
-                            return out[1];
-                        else
-                            return false;
-                    })(xhr.getResponseHeader('Content-Type'));
-                    var parts = get_parts(xhr.response, separator);
-
-                    ranges.forEach(function(item) {
-                        if (item !== false) {
-                            response.push(parts.shift());
-                        } else {
-                            response.push(false);
-                        }
-                    });
-                    resolve(response);
-                }
+                // var separator = (function(type){
+                //     var out = type.match(/boundary=(.+)$/);
+                //     if (out && out[1])
+                //         return out[1];
+                //     else
+                //         return false;
+                // })(xhr.getResponseHeader('Content-Type'));
+                // var parts = get_separated_parts(xhr.response, separator);
+                //
+                // ranges.forEach(function(item) {
+                //     if (item !== false) {
+                //         response.push(parts.shift());
+                //     } else {
+                //         response.push(false);
+                //     }
+                // });
+                // resolve(response);
 
             } else {
-                console.error(xhr.status);
-                console.log('bytes >', bytes);
-                console.log('status >', xhr.status);
-                console.log('range >', xhr.getResponseHeader('Content-Type'));
+                if (ranges.length === 1) {
+                    get_part(url, ranges[0]).then(resolve, reject);
+                } else {
+                    Promise.all(ranges.map(function(range, i) {
+                        if (range !== false)
+                            return get_part(url, range);
+                    })).then(resolve, reject);
+                }
             }
-        });
 
-        xhr.responseType = 'arraybuffer';
-        xhr.send();
-
+        } catch (error) {
+            console.error(error);
+            // throw error;
+        }
     });
 };
 
-function get_parts(response, separator) {
+function range_to_string(range) {
+    if (kk.is_n(range)) {
+        if (range >= 0) {
+            // Содержимое начиная с range байта файла
+            return(range + '-');
+        } else {
+            // Содержимое начиная с range байта с конца файла
+            return(range);
+        }
+    }
+
+    if (kk.is_A(range) &&
+        kk.is_n(range[0]) && range[0] >= 0 &&
+        kk.is_n(range[1]) && range[1] >= 0
+    ) {
+        return(range[0] + '-' + range[1]);
+    }
+}
+
+function get_whole_file(url) { return new Promise(function(resolve, reject) {
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'arraybuffer';
+
+        xhr.addEventListener('loadend', function(event) {
+            if (xhr.status === 200) {
+                resolve(convert_xhr(xhr));
+            } else {
+                reject({
+                    url: xhr.responseURL,
+                    status: xhr.status,
+                    range: xhr.getResponseHeader('Content-Type')
+                });
+            }
+        });
+
+        xhr.send();
+
+    } catch (error) {
+        console.error(error);
+        // throw error;
+    }
+})}
+
+function get_part(url, range) { return new Promise(function(resolve, reject) {
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.setRequestHeader('Range', 'bytes=' + range_to_string(range));
+
+        xhr.addEventListener('loadend', function(event) {
+            if (xhr.status === 206) {
+                if (xhr.getResponseHeader('Content-Range')) {
+                    var response = convert_xhr(xhr);
+                    response.range = range;
+                    resolve(response);
+                }
+            } else {
+                console.error(url, range, xhr.status);
+                console.log('range >', xhr.getResponseHeader('Content-Type'));
+                reject([url, range, xhr.status])
+            }
+        });
+
+        xhr.send();
+
+    } catch (error) {
+        console.error(error);
+        // throw error;
+    }
+})}
+
+function convert_xhr(xhr) {
+    return {
+        'headers': xhr.getAllResponseHeaders(),
+        'getHeader': function(name) {
+            return xhr.getResponseHeader(name);
+        },
+        'content': xhr.response
+    }
+}
+
+function get_separated_parts(response, separator) {
     var out = [];
-    var ranges = get_ranges(response, separator);
+    var ranges = separate(response, separator);
 
     ranges.forEach(function(item) {
         var headers = '';
@@ -630,7 +679,7 @@ function get_parts(response, separator) {
     return out;
 };
 
-function get_ranges(response, separator){
+function separate(response, separator){
     var view = new Uint8Array(response);
     var ranges = [];
     var cur = 0;
@@ -987,6 +1036,7 @@ kk.watch = function() {
         }
 
         // Создание прокси
+        // FIXME: привести в соответствие с Proxy
         Object.defineProperty(object, property, {
             enumerable: true,
             get: function() {return proxy_storage[property]},
