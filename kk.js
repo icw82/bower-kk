@@ -4,7 +4,7 @@
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.7.1',
+    v: '0.8.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
