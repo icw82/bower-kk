@@ -1,15 +1,15 @@
 # Packaged Kenzo Kit
 
-This repo is for distribution on `bower`. The source for this module is in the
-[main KK repo](https://github.com/icw82/kk).
-Please file issues and pull requests against that repo.
+This repository is for distribution on `npm`. The source for this module is in the
+[main KK repository](https://github.com/icw82/kk).
+Please file issues and pull requests against that repository.
 
 ## Install
 
-You can install this package with `bower`:
+You can install this package with `npm`:
 
 ```shell
-bower install kk
+npm install kenzo-kit
 ```
 
 ## [Documentation](https://github.com/icw82/kk/tree/master/doc)
