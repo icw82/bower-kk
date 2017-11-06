@@ -1,0 +1,22 @@
+{
+  "name": "kenzo-kit",
+  "version": "0.9.0",
+  "description": "ECMAscript (JS) library for web development",
+  "main": "./kk.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icw82/packaged-kk.git"
+  },
+  "keywords": [
+    "library"
+  ],
+  "author": "icw82",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/icw82/packaged-kk/issues"
+  },
+  "homepage": "https://github.com/icw82/packaged-kk#readme"
+}
