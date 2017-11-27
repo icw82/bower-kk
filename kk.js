@@ -4,7 +4,7 @@
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.9.0',
+    v: '0.10.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -15,6 +15,7 @@ var kenzo = {
 //    _s: 'string',
 //    _n: 'number',
 //    _A: Array,
+//    _D: Date,
 //    _E: Element,
 //    _N: Node,
 //    _NL: NodeList,
@@ -74,6 +75,7 @@ if (kenzo.is_o(root.document))
 [
     [Array, 'A'],
     [ArrayBuffer, 'AB'],
+    [Date, 'D'],
     [Element, 'E'],
     [Node, 'N'],
     [NodeList, 'NL'],
