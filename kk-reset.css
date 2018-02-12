@@ -8,6 +8,7 @@ pre, hr, form, article, aside, figure, figcaption, footer, header, hgroup, nav,
 section,details, summary{
     display: block; padding: 0; margin: 0; border: none; float: none;
     box-sizing: border-box}
+a{text-decoration-skip-ink: none}
 a, span, del, ins, abbr, acronym, dfn, em, strong, code, samp, kbd, var, b, i,
 small, sub, sup, bdo, cite, q, legend, label, canvas, mark, output, time{
     display: inline; padding: 0; margin: 0; background: none; border: none;
