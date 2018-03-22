@@ -4,7 +4,7 @@
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.10.1',
+    v: '0.12.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -275,77 +275,69 @@ kk.class_forever = function(name, element) {
 })(kk);
 
 (function(kk) {
-kk.Event = function(key) {
-    var listeners = [];
-    var is_completed = false;
-    var last_data;
+kk.Event = class kkEvent{
+    constructor(key) {
+        this.listeners = [];
+        this.state = {
+            last: undefined,
+            completed: false
+        }
 
-    Object.defineProperty(this, 'key', {
-        get: function() {return key}
-    });
-
-    this.hasListener = function(listener) {
-        return kk.each (listeners, function(item) {
-            return item === listener;
+        Object.defineProperty(this, 'key', {
+            get: () => key
         });
+
     }
 
-    this.addListener = function(listener) {
+    hasListener(listener) {
+        return this.listeners.find(item => item === listener);
+    }
+
+    addListener(listener) {
         if (!kk.is_f(listener) || this.hasListener(listener))
             return;
 
-        if (this.is_completed) {
-            listener(last_data);
-        } else {
-            listeners.push(listener);
-        }
+        if (this.state.completed)
+            listener(...this.state.last);
+        else
+            this.listeners.push(listener);
+
     }
 
-    this.removeListener = function(listener) {
+    removeListener(listener) {
         if (!kk.is_f(listener))
             return;
 
-        listeners = listeners.filter(function(item) {
-           return item !== listener;
-        });
+        this.listeners = this.listeners.filter(item => item !== listener);
     }
 
     // Если ключ задан, то он передаётся первым аргументом.
-    this.dispatch = function() {
-        if (this.is_completed)
+    dispatch(...data) {
+        let key;
+
+        if (this.state.completed)
             return;
 
-        var args = arguments;
-        var data;
-
-        if (kk.is_u(this.key)) {
-            data = args[0];
-        } else {
-            if (this.key === args[0]) {
-                data = args[1];
-            } else {
-                return;
-            }
+        if (this.key !== undefined) {
+            key = data.shift();
+            if (key !== this.key)
+                return false;
         }
 
-        last_data = data;
+        this.state.last = data;
 
-        kk.each (listeners, function(listener) {
-            listener(data);
-        });
-
-        return true;
+        this.listeners.forEach(listener => listener(...data));
     }
 
-    this.complete = function() {
-        if (this.is_completed)
+    complete() {
+        if (this.state.completed)
             return;
 
-        if (this.dispatch.apply(this, arguments)) {
-            this.is_completed = true;
-        }
+        this.dispatch.apply(this, arguments);
+        this.state.completed = true;
     }
-};
+
+}
 
 })(kk);
 
@@ -465,17 +457,13 @@ function phone(input) {
 })(kk);
 
 (function(kk) {
-kk.generate_key = function(length) {
-    var output = '';
-
+kk.generate_key = length => {
     if (!kk.is_n(length) || length < 1)
         length = 1;
 
-    kk.each (length, function() {
-        output += String.fromCharCode(kk.rand(19968, 40869));
-    });
-
-    return output;
+    return Array(length).fill('').reduce((prev, item) =>
+        prev + String.fromCharCode(kk.rand(19968, 40869))
+    , '');
 };
 
 })(kk);
