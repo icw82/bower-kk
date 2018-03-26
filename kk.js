@@ -4,7 +4,7 @@
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.12.0',
+    v: '0.13.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -392,10 +392,20 @@ function find(descendant, key, distance, type) {
 })(kk);
 
 (function(kk) {
-kk.format = {
-    number: number,
-    phone: phone
-};
+kk.format = {};
+
+const split = string => {
+    if (!kk.is_s(string))
+        throw new TypeError('Expected a string');
+
+    let output = string;
+
+    output = output.replace(/([\s-–—_]+)/g, `-`);
+    output = output.replace(/([a-z])([A-Z])/g, `$1-$2`);
+    output = output.toLowerCase();
+
+    return output.split('-');
+}
 
 //kenzo.num_to_ru = function(n) {
 //    if (typeof n == 'number')
@@ -404,7 +414,19 @@ kk.format = {
 //        return n.replace(/\./,',');
 //}
 
-function number(input) {
+kk.format.camelize = (string, dont_first_letter) =>
+    split(string).map((part, index) => {
+        let first_letter = part.charAt(0);
+        
+        if (!(index === 0 && dont_first_letter))
+            first_letter = first_letter.toUpperCase();
+
+        return first_letter + part.substr(1);
+    }).join('');
+
+kk.format.decamelize = string => split(string).join('-');
+
+kk.format.number = input => {
     if (kk.is_n(input))
         input = String(input);
 
@@ -428,7 +450,7 @@ function number(input) {
 
 // Российские номера
 // TODO: не только российские
-function phone(input) {
+kk.format.phone = input => {
     if (kk.is_n(input))
         input = String(input);
 
