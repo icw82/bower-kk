@@ -1,10 +1,10 @@
 'use strict';
 
-(function() {
+(() => {
 var root;
 var cons = console;
 var kenzo = {
-    v: '0.13.0',
+    v: '0.14.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -110,7 +110,7 @@ kenzo.r = root;
 
 })();
 
-(function(kk) {
+(kk => {
 // Перебор массива
 //
 // Перебор прерывается, eсли обратная функция возвращает значение, отличное
@@ -175,7 +175,7 @@ if (typeof kk.r.each === kk._u)
 
 })(kk);
 
-(function(kk) {
+(kk => {
 // Случайное целое число
 kk.rand = function() {
     var args = arguments;
@@ -215,7 +215,7 @@ kk.rand = function() {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.class = function(element, classes, mask) {
     if (!kk.is_E(element))
         throw kk.err.ia;
@@ -252,7 +252,7 @@ kk.class = function(element, classes, mask) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.class_forever = function(name, element) {
     element.classList.add(name);
 
@@ -274,7 +274,7 @@ kk.class_forever = function(name, element) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.Event = class kkEvent{
     constructor(key) {
         this.listeners = [];
@@ -341,7 +341,7 @@ kk.Event = class kkEvent{
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.find_ancestor = function(descendant, keys, distance) {
     if (!kk.is_n(distance))
         distance = false;
@@ -391,7 +391,7 @@ function find(descendant, key, distance, type) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.format = {};
 
 const split = string => {
@@ -423,6 +423,9 @@ kk.format.camelize = (string, dont_first_letter) =>
 
         return first_letter + part.substr(1);
     }).join('');
+
+kk.format.capitalize = (string) =>
+    string.charAt(0).toUpperCase() + string.substr(1);
 
 kk.format.decamelize = string => split(string).join('-');
 
@@ -478,7 +481,7 @@ kk.format.phone = input => {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.generate_key = length => {
     if (!kk.is_n(length) || length < 1)
         length = 1;
@@ -490,7 +493,7 @@ kk.generate_key = length => {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.get_buffer = function(/*url, [ranges,] in_one_request =  false*/) {
     var args = kk._A.prototype.slice.call(arguments);
 
@@ -756,7 +759,7 @@ function separate(response, separator){
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.get_offset = function(element) {
     var boundingClientRect = element.getBoundingClientRect();
 
@@ -770,7 +773,7 @@ kk.get_offset = function(element) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.i8to2 = function(int8) {
     var output = int8.toString(2);
 
@@ -803,7 +806,7 @@ kk.i8ArrayToString = function(array) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 // Локальное хранилище
 kk.ls = (function(kk, localStorage) {
     var _ = {};
@@ -838,7 +841,7 @@ kk.ls = (function(kk, localStorage) {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 kk.plural = function() {
     // TODO: Для других языков.
 
@@ -909,7 +912,7 @@ kk.plural = function() {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 // Обёртка IDB для простых операций с одним хранилищем (storage);
 class SimpleStore {
     constructor(schema) {
@@ -1067,7 +1070,7 @@ kk.SimpleStore = SimpleStore;
 
 })(kk);
 
-(function(kk) {
+(kk => {
 if (!kk.d) return;
 
 var define = Object.defineProperty;
@@ -1132,7 +1135,7 @@ define(viewport.body, 'h', {
 
 })(kk);
 
-(function(kk) {
+(kk => {
 var proxy_storage_name = '__proxy__';
 
 kk.ProxyStorage = function() {}

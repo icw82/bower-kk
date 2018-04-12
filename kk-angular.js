@@ -1,6 +1,6 @@
 'use strict';
 
-(function(kk) {
+(kk => {
 //var name = 'kenzo';
 var modules = ['ngCookies', 'ngResource'];
 

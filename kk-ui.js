@@ -1,6 +1,6 @@
 'use strict';
 
-(function(kk) {
+(kk => {
 /*
     Модуль для работы с графическим интерфейсом
 
@@ -26,7 +26,7 @@ kk.ui = {}
 
 })(kk);
 
-(function(kk) {
+(kk => {
 // Класс .hover и .pressed всем ссылкам на один и тот же документ
 //kenzo.anchors = (function() {
 //    // TODO: 'xlink:href'
@@ -73,7 +73,7 @@ kk.ui = {}
 
 })(kk);
 
-(function(kk) {
+(kk => {
 class Billboard {
     constructor (list) {
         const self = this;
@@ -236,7 +236,57 @@ kk.ui.Billboard = Billboard;
 
 })(kk);
 
-(function(kk) {
+(kk => {
+kk.ElementEvents = class ElementEvents {
+    constructor(element) {
+        if (!kk.is_E(element))
+            throw new TypeError();
+
+        const self = this;
+
+        const available_events = [
+            'mutation',
+            'node_addition',
+            'node_removal',
+            'element_addition',
+            'element_removal'
+        ];
+
+        available_events.forEach(event => {
+            this[`on_${event}`] = new kk.Event();
+        });
+
+        const observer = new MutationObserver(function(mutations) {
+            self.on_mutation.dispatch(mutations);
+        });
+        observer.observe(element, {childList: true, subtree: true});
+
+        this.on_mutation.addListener(mutations => {
+            each (mutations, function(mutation) {
+                each (mutation.addedNodes, element => {
+                    self.on_node_addition.dispatch(element);
+                });
+                each (mutation.removedNodes, element => {
+                    self.on_node_removal.dispatch(element);
+                });
+            });
+        });
+
+        this.on_node_addition.addListener(element => {
+            if (kk.is_E(element))
+                self.on_element_addition.dispatch(element);
+        });
+
+        this.on_node_removal.addListener(element => {
+            if (kk.is_E(element))
+                self.on_element_removal.dispatch(element);
+        });
+    }
+}
+
+})(kk);
+
+(kk => {
 /*
     v.2 2017.04.11
 
@@ -982,7 +1032,7 @@ kk.ui.Billboard = Billboard;
 
 })(kk);
 
-(function(kk) {
+(kk => {
 var module = {};
 
 var top_layer = document.querySelector('.layout-top-layer');
