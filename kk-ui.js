@@ -90,13 +90,13 @@ class Billboard {
     }
 
     set_size(width, heigth) {
-        if (kk.is_s(width))
+        if (kk.is.s(width))
             width = parseInt(width);
 
-        if (kk.is_s(heigth))
+        if (kk.is.s(heigth))
             heigth = parseInt(heigth);
 
-        if (kk.is_n(width) && kk.is_n(heigth)) {
+        if (kk.is.n(width) && kk.is.n(heigth)) {
             if (!isNaN(width) && !isNaN(heigth)) {
                 // TODO: проверка
                 this.width = width;
@@ -116,10 +116,10 @@ class Billboard {
 
     static convert(list) {
         return list.map(item => {
-            if (kk.is_o(item))
+            if (kk.is.o(item))
                 return item
 
-            if (kk.is_n(item))
+            if (kk.is.n(item))
                 return {value: item}
 
             throw Error('Неверный формат элемента ряда');
@@ -176,7 +176,7 @@ class Billboard {
 
             const temp = state.list[state.cursor + a];
 
-            if (!kk.is_o(temp)) {
+            if (!kk.is.o(temp)) {
 //                console.log('Список закончен');
                 state.cursor = state.cursor - b + 1;
                 return state;
@@ -239,7 +239,7 @@ kk.ui.Billboard = Billboard;
 (kk => {
 kk.ElementEvents = class ElementEvents {
     constructor(element) {
-        if (!kk.is_E(element))
+        if (!kk.is.E(element))
             throw new TypeError();
 
         const self = this;
@@ -273,12 +273,12 @@ kk.ElementEvents = class ElementEvents {
         });
 
         this.on_node_addition.addListener(element => {
-            if (kk.is_E(element))
+            if (kk.is.E(element))
                 self.on_element_addition.dispatch(element);
         });
 
         this.on_node_removal.addListener(element => {
-            if (kk.is_E(element))
+            if (kk.is.E(element))
                 self.on_element_removal.dispatch(element);
         });
     }
@@ -1036,19 +1036,19 @@ kk.ElementEvents = class ElementEvents {
 var module = {};
 
 var top_layer = document.querySelector('.layout-top-layer');
-if (!kk.is_E(top_layer)) {
+if (!kk.is.E(top_layer)) {
     console.log('Верхний слой не обнаружен');
     return;
 }
 
 var popup_layer = document.querySelector('.layout-top-layer');
-if (!kk.is_E(popup_layer)) {
+if (!kk.is.E(popup_layer)) {
     console.log('Слой для панелей не обнаружен');
     return;
 }
 
 var shadow_layer = document.querySelector('.layout-top-layer');
-if (!kk.is_E(shadow_layer)) {
+if (!kk.is.E(shadow_layer)) {
     console.log('Затеняющий слой не обнаружен');
     return;
 }

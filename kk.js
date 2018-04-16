@@ -1,10 +1,8 @@
 'use strict';
 
 (() => {
-var root;
-var cons = console;
-var kenzo = {
-    v: '0.14.0',
+const kk = {
+    v: '0.15.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -22,93 +20,93 @@ var kenzo = {
 //    _C: HTMLCollection,
 };
 
-kenzo.msg = {
+kk.msg = {
     cb: 'Обратный вызов не определён или не является функцией',
-    ia: 'Некорректные аргументы',
     ae: 'Уже существует'
 };
 
-kenzo.err = {}; // errors
+kk.err = {}; // errors
 
-Object.keys(kenzo.msg)
-    .forEach(function(key) {
-        kenzo.err[key] = Error(kenzo.msg[key]);
-    });
-
-kenzo.__d = function() {cons.warn('Depricated')};
-
-kenzo.__a = function() {
-    cons.error(kenzo.msg.ia); kenzo.__d();
-};
-kenzo.__ae = function() {
-    cons.warn(kenzo.msg.ae); kenzo.__d();
-};
-
-// TODO: errors
-
-[
-    'undefined',
-    'boolean',
-    'number',
-    'string',
-    'object',
-    'function'
-].forEach(function(s) {
-    kenzo['_' + s[0]] = s;
-    kenzo['is_' + s[0]] = function(a) {return typeof a === s}
+Object.keys(kk.msg).forEach(key => {
+    kk.err[key] = Error(kk.msg[key]);
 });
 
+kk.__d = () => console.warn('Depricated');
+
+
 if (
-    kenzo.is_o(window) &&
-    (kenzo.is_f(Window) || kenzo.is_o(Window)) &&
+    (Window instanceof Function) &&
     (window instanceof Window)
 ) {
-    root = window;
-    kenzo.w = window;
-} else if (kenzo.is_o(global)) {
-    root = global;
+    kk.w = window;
+    kk.global = kk.r = kk.w;
+
+} else {
+    console.warn('Node.js?');
 }
 
-if (kenzo.is_o(root.document))
-    kenzo.d = root.document;
+if (kk.r.document instanceof Object)
+    kk.d = kk.r.document;
 
-[
-    [Array, 'A'],
-    [ArrayBuffer, 'AB'],
-    [Date, 'D'],
-    [Element, 'E'],
-    [Node, 'N'],
-    [NodeList, 'NL'],
-    [HTMLCollection, 'C']
-].forEach(function(p) {
-    if (
-        typeof p[0] !== kenzo._u &&
-        (kenzo.is_f(p[0]) || kenzo.is_o(p[0]))
-    ) {
-        kenzo['_' + p[1]] = p[0];
-        kenzo['is_' + p[1]] = function(a) {return a instanceof p[0]}
-    }
-});
+kk.ts = () => Date.now();
 
-root.kenzo = root.kk = kenzo;
-
-kenzo.ts = function() {
-    var time = new Date();
-    return time.getTime();
-}
-
-if (
-    typeof module !== kenzo._u &&
-    kenzo.is_o(module) &&
-    kenzo.is_o(module.exports)
-) {
-    // FUTURE: запилить для ноды
-    module.exports = kenzo;
-}
-
-kenzo.r = root;
+kk.r.kk = kk.r.kenzo = kk;
 
 })();
+
+(kk => {
+kk.is = (() => {
+    const is = {
+        u: 'undefined',
+        b: 'boolean',
+        n: 'number',
+        s: 'string',
+//        sy: 'symbol',
+        o: 'object',
+        f: 'function',
+        c: 'function', // class
+    };
+
+    Object.keys(is).forEach(key => {
+        const type = is[key];
+
+        is[key] = (...args) =>
+            !(args.filter(item => typeof item !== type).length > 0);
+    });
+
+    //Boolean
+    //Number
+    //String
+    //Symbol
+
+    is.addTest = (name, type) => {
+        if (is.hasOwnProperty(name))
+            throw new kk.err.ae();
+
+        if (!is.c(type))
+            throw new TypeError();
+
+        is[name] = (...args) =>
+            !(args.filter(item => !(item instanceof type)).length > 0)
+    }
+
+    [
+        ['A', Array],
+        ['AB', ArrayBuffer],
+        ['D', Date],
+        ['E', Element],
+        ['N', Node],
+        ['NL', NodeList],
+        ['C', HTMLCollection]
+    ].forEach(args => {
+        is.addTest(...args);
+    });
+
+    return is;
+
+})();
+
+})(kk);
 
 (kk => {
 // Перебор массива
@@ -127,39 +125,43 @@ kk.each = function() {
     var first = args[0];
     var callback = args[1];
 
-    if (!kk.is_f(callback))
+    if (!kk.is.f(callback))
         throw kk.err.cb;
 
-    var def = kk.is_f(args[2]) ? args[2] : false;
+    var def = kk.is.f(args[2]) ? args[2] : false;
     var last = args[args.length - 1];
-    var reverse = kk.is_b(last) ? last : false;
+    var reverse = kk.is.b(last) ? last : false;
     var index;
     var result;
     var pseudo = false;
 
-    if (kk.is_s(first) && kk.d) {
+    if (kk.is.u(first))
+        return void 0;
+
+    if (kk.is.s(first) && kk.d) {
         array = kk.d.querySelectorAll(first);
-    } else if (kk.is_n(first)) {
-        array = kk._A(Math.floor(Math.max(0, first)));
+    } else if (kk.is.n(first)) {
+        array = Array(Math.floor(Math.max(0, first)));
         pseudo = true;
     } else if (ArrayBuffer.isView(first) && (first.length > 0)) {
-        array = kk._A.prototype.slice.call(first);
+        array = Array.prototype.slice.call(first);
         //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
-    } else if (kk.is_A(first) || kk.is_NL(first) || kk.is_C(first)) {
+    } else if (kk.is.A(first) || kk.is.NL(first) || kk.is.C(first)) {
         array = first;
     }
+
 
     if (array.length > 0) {
         if (reverse) {
             for (index = array.length - 1; index >= 0; index--) {
                 result = callback(pseudo ? index : array[index], index, array);
-                if (!kk.is_u(result))
+                if (!kk.is.u(result))
                     return result;
             }
         } else {
             for (index = 0; index < array.length; index++) {
                 result = callback(pseudo ? index : array[index], index, array);
-                if (!kk.is_u(result))
+                if (!kk.is.u(result))
                     return result;
             }
         }
@@ -170,7 +172,7 @@ kk.each = function() {
     }
 };
 
-if (typeof kk.r.each === kk._u)
+if (kk.r.each === void 0)
     kk.r.each = kk.each;
 
 })(kk);
@@ -183,15 +185,15 @@ kk.rand = function() {
     var max;
 
     // Если аргументов нет — выдавать случайно true/false
-    if (!kk.is_n(args[0]))
+    if (!kk.is.n(args[0]))
         return !Math.round(Math.random())
 
     // Если аргумент только один — задаёт разряд случайного числа
-    if (!kk.is_n(args[1])) {
+    if (!kk.is.n(args[1])) {
         var depth = Math.floor(Math.abs(args[0]));
 
         if (depth >= 16)
-            throw kk.err.ia;
+            throw new TypeError();
 
         if (depth === 0)
             return 0;
@@ -217,26 +219,26 @@ kk.rand = function() {
 
 (kk => {
 kk.class = function(element, classes, mask) {
-    if (!kk.is_E(element))
-        throw kk.err.ia;
+    if (!kk.is.E(element))
+        throw new TypeError();
 
-    if (kk.is_s(classes))
+    if (kk.is.s(classes))
         classes = [classes];
 
-    if (!kk.is_A(classes))
-        throw kk.err.ia;
+    if (!kk.is.A(classes))
+        throw new TypeError();
 
-    if (!kk.is_A(mask))
+    if (!kk.is.A(mask))
         mask = [];
 
     mask.forEach(function(item) {
-        if (!kk.is_s(item))
-            throw kk.err.ia;
+        if (!kk.is.s(item))
+            throw new TypeError();
     });
 
     classes.forEach(function(item) {
-        if (!kk.is_s(item))
-            throw kk.err.ia;
+        if (!kk.is.s(item))
+            throw new TypeError();
     });
 
     mask.forEach(function(item) {
@@ -294,7 +296,7 @@ kk.Event = class kkEvent{
     }
 
     addListener(listener) {
-        if (!kk.is_f(listener) || this.hasListener(listener))
+        if (!kk.is.f(listener) || this.hasListener(listener))
             return;
 
         if (this.state.completed)
@@ -305,7 +307,7 @@ kk.Event = class kkEvent{
     }
 
     removeListener(listener) {
-        if (!kk.is_f(listener))
+        if (!kk.is.f(listener))
             return;
 
         this.listeners = this.listeners.filter(item => item !== listener);
@@ -343,15 +345,15 @@ kk.Event = class kkEvent{
 
 (kk => {
 kk.find_ancestor = function(descendant, keys, distance) {
-    if (!kk.is_n(distance))
+    if (!kk.is.n(distance))
         distance = false;
 
-    if (kk.is_s(keys))
+    if (kk.is.s(keys))
         keys = [keys];
 
-    if (kk.is_A(keys)) {
+    if (kk.is.A(keys)) {
         return kk.each (keys, function(key) {
-            if (kk.is_s(key))
+            if (kk.is.s(key))
                 return type(descendant, key, distance);
         });
     }
@@ -371,9 +373,9 @@ function find(descendant, key, distance, type) {
         return;
 
     if (
-        kk.is_E(descendant) &&
+        kk.is.E(descendant) &&
         ('parentNode' in descendant) &&
-        kk.is_E(descendant.parentNode)
+        kk.is.E(descendant.parentNode)
     ) {
         var parent = descendant.parentNode;
 
@@ -395,7 +397,7 @@ function find(descendant, key, distance, type) {
 kk.format = {};
 
 const split = string => {
-    if (!kk.is_s(string))
+    if (!kk.is.s(string))
         throw new TypeError('Expected a string');
 
     let output = string;
@@ -430,11 +432,11 @@ kk.format.capitalize = (string) =>
 kk.format.decamelize = string => split(string).join('-');
 
 kk.format.number = input => {
-    if (kk.is_n(input))
+    if (kk.is.n(input))
         input = String(input);
 
-    if (!kk.is_s(input) || input === '')
-        throw kk.err.ia;
+    if (!kk.is.s(input) || input === '')
+        throw new TypeError();
 
     var output = '';
     var delimiter = ' ';
@@ -454,11 +456,11 @@ kk.format.number = input => {
 // Российские номера
 // TODO: не только российские
 kk.format.phone = input => {
-    if (kk.is_n(input))
+    if (kk.is.n(input))
         input = String(input);
 
-    if (!kk.is_s(input) || input === '')
-        throw kk.err.ia;
+    if (!kk.is.s(input) || input === '')
+        throw new TypeError();
 
     var output = '';
     var number = input
@@ -483,7 +485,7 @@ kk.format.phone = input => {
 
 (kk => {
 kk.generate_key = length => {
-    if (!kk.is_n(length) || length < 1)
+    if (!kk.is.n(length) || length < 1)
         length = 1;
 
     return Array(length).fill('').reduce((prev, item) =>
@@ -495,25 +497,25 @@ kk.generate_key = length => {
 
 (kk => {
 kk.get_buffer = function(/*url, [ranges,] in_one_request =  false*/) {
-    var args = kk._A.prototype.slice.call(arguments);
+//    console.log(arguments);
 
-    return new Promise(function(resolve, reject) {
+    var args = Array.prototype.slice.call(arguments);
+
+    return new Promise((resolve, reject) => {
         try {
             var url = args.shift();
             var ranges;
             var in_one_request = false;
 
-            if (args.length > 1 && kk.is_b(args[args.length - 1]))
+            if (args.length > 1 && kk.is.b(args[args.length - 1]))
                 in_one_request = args.pop();
 
             ranges = args;
 
-            // console.log(url, ranges, in_one_request);
+//            console.log(url, ranges, in_one_request);
 
-            if (!kk.is_s(url)) {
-                reject(kk.err.ia);
-                return;
-            }
+            if (!kk.is.s(url))
+                reject('URL не задан');
 
             if (
                 (ranges.length === 0) ||
@@ -526,16 +528,15 @@ kk.get_buffer = function(/*url, [ranges,] in_one_request =  false*/) {
             // Валидация запроса
             ranges = ranges.map(function(item, i) {
                 if (
-                    kk.is_n(item) || (
-                        kk.is_A(item) &&
-                        kk.is_n(item[0]) && item[0] >= 0 &&
-                        kk.is_n(item[1]) && item[1] >= 0
+                    kk.is.n(item) || (
+                        kk.is.A(item) &&
+                        kk.is.n(item[0]) && item[0] >= 0 &&
+                        kk.is.n(item[1]) && item[1] >= 0
                     )
                 ) {
                     return item;
                 }
 
-                // console.warn(kk.msg.ia, item);
                 return false;
             });
 
@@ -581,7 +582,7 @@ kk.get_buffer = function(/*url, [ranges,] in_one_request =  false*/) {
 };
 
 function range_to_string(range) {
-    if (kk.is_n(range)) {
+    if (kk.is.n(range)) {
         if (range >= 0) {
             // Содержимое начиная с range байта файла
             return(range + '-');
@@ -591,9 +592,9 @@ function range_to_string(range) {
         }
     }
 
-    if (kk.is_A(range) &&
-        kk.is_n(range[0]) && range[0] >= 0 &&
-        kk.is_n(range[1]) && range[1] >= 0
+    if (kk.is.A(range) &&
+        kk.is.n(range[0]) && range[0] >= 0 &&
+        kk.is.n(range[1]) && range[1] >= 0
     ) {
         return(range[0] + '-' + range[1]);
     }
@@ -813,7 +814,7 @@ kk.ls = (function(kk, localStorage) {
 
     _.create = function() {
         kk.each (arguments, function(item) {
-            if ((typeof item == kk._s) && (!localStorage.getItem(item))) {
+            if ((kk.is.s(item)) && (!localStorage.getItem(item))) {
                 localStorage.setItem(item, JSON.stringify([]));
                 localStorage.setItem('@' + item, kk.ts());
             }
@@ -852,7 +853,7 @@ kk.plural = function() {
     var second = args[1];
     var amount, singular, paucal, plural, fr;
 
-    if (kk.is_s(first)) {
+    if (kk.is.s(first)) {
         if (langs.indexOf(first) > -1) {
             lang = first;
             return true;
@@ -860,11 +861,11 @@ kk.plural = function() {
             return false;
     }
 
-    if (kk.is_n(first)) {
+    if (kk.is.n(first)) {
         amount = first;
-    } else if (first instanceof kk._A) {
+    } else if (kk.is.A(first)) {
         amount = first.length;
-    } else if (typeof first == kk._o) {
+    } else if (kk.is.o(first)) {
         // NOTE: Может убрать к херам?
         amount = 0;
         for (var j in first)
@@ -876,19 +877,19 @@ kk.plural = function() {
         amount = -amount;
 
     if (
-        kk.is_A(second) &&
-        kk.is_s(second[0]) &&
-        kk.is_s(second[1]) &&
-        kk.is_s(second[2])
+        kk.is.A(second) &&
+        kk.is.s(second[0]) &&
+        kk.is.s(second[1]) &&
+        kk.is.s(second[2])
     ) {
         singular = second[0];
         paucal = second[1];
         plural = second[2];
 
     } else if (
-        kk.is_s(args[1]) &&
-        kk.is_s(args[2]) &&
-        kk.is_s(args[3])
+        kk.is.s(args[1]) &&
+        kk.is.s(args[2]) &&
+        kk.is.s(args[3])
     ) {
 //        kk.__d();
         return kk.plural(amount, [args[1], args[2], args[3]]);
@@ -916,17 +917,17 @@ kk.plural = function() {
 // Обёртка IDB для простых операций с одним хранилищем (storage);
 class SimpleStore {
     constructor(schema) {
-        if (!kk.is_o(schema))
-            throw kk.msg.ia;
+        if (!kk.is.o(schema))
+            throw new TypeError();
 
-        if (!kk.is_s(schema.name))
-            throw kk.msg.ia;
+        if (!kk.is.s(schema.name))
+            throw new TypeError();
 
-        if (!kk.is_o(schema.store))
-            throw kk.msg.ia;
+        if (!kk.is.o(schema.store))
+            throw new TypeError();
 
-        if (!kk.is_s(schema.store.name))
-            throw kk.msg.ia;
+        if (!kk.is.s(schema.store.name))
+            throw new TypeError();
 
         // Если версия не указана и база с таким названием не найдена,
         // то будет создана база данных указанным названием и версией 1.
@@ -935,8 +936,8 @@ class SimpleStore {
         // то соединение с ней будет открыто без изменения версии
         // (то есть с текущей версией).
 
-        if (('version' in schema) && !kk.is_n(schema.version))
-            throw kk.msg.ia;
+        if (('version' in schema) && !kk.is.n(schema.version))
+            throw new TypeError();
 
         const self = this;
 
@@ -960,7 +961,7 @@ class SimpleStore {
         const database = event.target.result;
         const name = this.schema.store.name;
         const key = this.schema.store.key || false;
-        const indexes = kk.is_A(this.schema.store.indexes) ? this.schema.store.indexes : [];
+        const indexes = kk.is.A(this.schema.store.indexes) ? this.schema.store.indexes : [];
         const options = {};
 
         if (database.objectStoreNames.contains(name)) {
@@ -1014,7 +1015,7 @@ class SimpleStore {
                     .transaction(self.schema.store.name, 'readonly')
                     .objectStore(self.schema.store.name);
 
-                if (kk.is_s(index) && self.schema.store.indexes.includes(index)) {
+                if (kk.is.s(index) && self.schema.store.indexes.includes(index)) {
                     store = store.index(index);
 
                     const key = IDBKeyRange.only(id);
@@ -1082,7 +1083,7 @@ var viewport = {
 viewport.root = viewport.body; // DEPRECATED
 kk.viewport = viewport;
 
-if (kk.is_n(kk.r.pageXOffset)) {
+if (kk.is.n(kk.r.pageXOffset)) {
     define(viewport, 'x', {
         get: function() {
             return kk.r.pageXOffset
@@ -1136,9 +1137,11 @@ define(viewport.body, 'h', {
 })(kk);
 
 (kk => {
-var proxy_storage_name = '__proxy__';
+const PROXI_STORAGE_NAME = '__proxy__';
 
-kk.ProxyStorage = function() {}
+kk.ProxyStorage = class ProxyStorage {
+    constructor() {}
+}
 
 function process(input) {
     var output = [];
@@ -1149,9 +1152,9 @@ function process(input) {
     };
 
     input.forEach(function(item) {
-        if (kk.is_s(item)) {
+        if (kk.is.s(item)) {
             check_and_push(item);
-        } else if (kk.is_A(item)) {
+        } else if (kk.is.A(item)) {
             process(item).forEach(check_and_push);
         }
     });
@@ -1159,34 +1162,30 @@ function process(input) {
     return output;
 }
 
-/* object, [property(-ies),] callback */
-kk.watch = function() {
-    var properties = [].slice.call(arguments);
-    //var args = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments));
-    var object = properties.shift();
-    var callback = properties.pop();
-    var proxy_storage;
+kk.watch = (object, ...properties) => {
+    const callback = properties.pop();
 
-    // TODO: Добавить больше исключений
+    console.log('properties >', properties);
+
     if (
-        !kk.is_o(object) ||
-        kk.is_A(object) ||
-        kk.is_NL(object) ||
-        !kk.is_f(callback)
+        (!kk.is.o(object) || object === null) ||
+        (!kk.is.f(callback) && !(callback instanceof kk.Event)) ||
+        (properties.length > 0 && !kk.is.s(...properties))
     )
-        throw kk.err.ia;
+        throw new TypeError();
 
-    // Проверка существовоания хранилища переменных
-    if (object[proxy_storage_name] instanceof kk.ProxyStorage) {
-        proxy_storage = object[proxy_storage_name];
-    } else {
-        Object.defineProperty(object, proxy_storage_name, {
+    if (!object.hasOwnProperty(PROXI_STORAGE_NAME)) {
+        Object.defineProperty(object, PROXI_STORAGE_NAME, {
             enumerable: false,
             writable: true
         });
-
-        proxy_storage = object[proxy_storage_name] = new kk.ProxyStorage;
     }
+
+    if (!(object[PROXI_STORAGE_NAME] instanceof kk.ProxyStorage)) {
+        object[PROXI_STORAGE_NAME] = new kk.ProxyStorage();
+    }
+
+    const proxy_storage = object[PROXI_STORAGE_NAME];
 
     // Имена свойств не заданы, прокси для каждого ключа
     if (properties.length === 0) {
@@ -1212,10 +1211,15 @@ kk.watch = function() {
         // FIXME: привести в соответствие с Proxy
         Object.defineProperty(object, property, {
             enumerable: true,
-            get: function() {return proxy_storage[property]},
-            set: function(value) {
-                proxy_storage[property] = value;
-                callback(object, property);
+            get: () => proxy_storage[property],
+            set: (new_value) => {
+                const prev_value = proxy_storage[property];
+                proxy_storage[property] = new_value;
+
+                if (callback instanceof kk.Event)
+                    callback.dispatch(prev_value, new_value);
+                else
+                    callback(object, property);
             }
         });
     });

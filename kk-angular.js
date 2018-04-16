@@ -35,7 +35,7 @@ angular
     .module('kenzo')
     .filter('number', function() {
         return function(input) {
-            if (kk.is_n(input) && input > 999)
+            if (kk.is.n(input) && input > 999)
                 return kk.format.number(input)
             else
                 return input
