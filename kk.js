@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.15.0',
+    v: '0.15.1',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -1164,8 +1164,6 @@ function process(input) {
 
 kk.watch = (object, ...properties) => {
     const callback = properties.pop();
-
-    console.log('properties >', properties);
 
     if (
         (!kk.is.o(object) || object === null) ||
