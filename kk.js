@@ -1214,10 +1214,12 @@ kk.watch = (object, ...properties) => {
                 const prev_value = proxy_storage[property];
                 proxy_storage[property] = new_value;
 
-                if (callback instanceof kk.Event)
-                    callback.dispatch(prev_value, new_value);
-                else
-                    callback(object, property);
+                if (new_value !== prev_value) {
+                    if (callback instanceof kk.Event)
+                        callback.dispatch(prev_value, new_value);
+                    else
+                        callback(prev_value, new_value);
+                }
             }
         });
     });
