@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.16',
+    v: '0.16.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
