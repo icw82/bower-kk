@@ -47,8 +47,9 @@ if (
     throw Error(`Неизвестно что`)
 }
 
-if (kk.r.document instanceof Object)
-    kk.d = kk.r.document;
+Object.defineProperty(kk, 'd', {
+    get: () => kk.r.document instanceof Object ? kk.r.document : void 0
+})
 
 kk.ts = () => Date.now();
 
