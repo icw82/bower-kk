@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.16.0',
+    v: '0.16.1',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -35,14 +35,16 @@ kk.__d = () => console.warn('Depricated');
 
 
 if (
-    (Window instanceof Function) &&
+    (typeof Window === 'function' || Window instanceof Function) &&
     (window instanceof Window)
 ) {
     kk.w = window;
     kk.global = kk.r = kk.w;
 
 } else {
-    console.warn('Node.js?');
+    console.warn(Window, Window instanceof Function, Function);
+    console.warn(window, window instanceof Window, Window);
+    throw Error(`Неизвестно что`)
 }
 
 if (kk.r.document instanceof Object)
