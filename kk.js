@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.16.1',
+    v: '0.17.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -47,9 +47,7 @@ if (
     throw Error(`Неизвестно что`)
 }
 
-Object.defineProperty(kk, 'd', {
-    get: () => kk.r.document instanceof Object ? kk.r.document : void 0
-})
+Object.defineProperty(kk, 'd', { get: () => kk.r.document });
 
 kk.ts = () => Date.now();
 
@@ -283,8 +281,10 @@ kk.class_forever = function(name, element) {
 kk.Event = class kkEvent{
     constructor(key) {
         this.listeners = [];
+        this.queue = [];
         this.state = {
-            last: undefined,
+            last: void 0,
+            processed: false,
             completed: false
         }
 
@@ -299,7 +299,10 @@ kk.Event = class kkEvent{
     }
 
     addListener(listener) {
-        if (!kk.is.f(listener) || this.hasListener(listener))
+        if (!kk.is.f(listener))
+            throw TypeError();
+
+        if (this.hasListener(listener))
             return;
 
         if (this.state.completed)
@@ -307,6 +310,10 @@ kk.Event = class kkEvent{
         else
             this.listeners.push(listener);
 
+        // Новые слушатели, появившиеся в процессе обхода существующих
+        // попадают также в очередь выполнения
+        if (this.state.processed)
+            this.queue.push(listener);
     }
 
     removeListener(listener) {
@@ -323,6 +330,8 @@ kk.Event = class kkEvent{
         if (this.state.completed)
             return;
 
+        this.state.processed = true;
+
         if (this.key !== undefined) {
             key = data.shift();
             if (key !== this.key)
@@ -331,7 +340,16 @@ kk.Event = class kkEvent{
 
         this.state.last = data;
 
-        this.listeners.forEach(listener => listener(...data));
+        this.listeners.forEach(listener => {
+            listener(...data);
+        });
+
+        while (this.queue.length > 0) {
+            const listener = this.queue.shift();
+            listener(...data);
+        }
+
+        this.state.processed = false;
     }
 
     complete() {
@@ -339,9 +357,9 @@ kk.Event = class kkEvent{
             return;
 
         this.dispatch.apply(this, arguments);
+
         this.state.completed = true;
     }
-
 }
 
 })(kk);
