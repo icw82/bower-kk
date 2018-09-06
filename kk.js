@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.17.0',
+    v: '0.19.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -180,21 +180,24 @@ if (kk.r.each === void 0)
 
 (kk => {
 // Случайное целое число
-kk.rand = function() {
-    var args = arguments;
-    var min;
-    var max;
+kk.rand = (first, second) => {
+    let min;
+    let max;
+
+    // Если первым аргументом передан массив
+    if (kk.is.A(first))
+        return first[ kk.rand(0, first.length - 1) ];
 
     // Если аргументов нет — выдавать случайно true/false
-    if (!kk.is.n(args[0]))
+    if (!kk.is.n(first))
         return !Math.round(Math.random())
 
     // Если аргумент только один — задаёт разряд случайного числа
-    if (!kk.is.n(args[1])) {
-        var depth = Math.floor(Math.abs(args[0]));
+    if (!kk.is.n(second)) {
+        var depth = Math.floor(Math.abs(first));
 
         if (depth >= 16)
-            throw new TypeError();
+            throw new Error(`Нельзя задать число более чем в 16 знаков`);
 
         if (depth === 0)
             return 0;
@@ -209,8 +212,8 @@ kk.rand = function() {
     }
 
     // Если два аргумента
-    min = args[0];
-    max = args[1] + 1;
+    min = first;
+    max = second + 1;
 
     return Math.floor( Math.random() * (max - min) ) + min;
 
@@ -279,7 +282,7 @@ kk.class_forever = function(name, element) {
 
 (kk => {
 kk.Event = class kkEvent{
-    constructor(key) {
+        constructor() {
         this.listeners = [];
         this.queue = [];
         this.state = {
@@ -287,11 +290,6 @@ kk.Event = class kkEvent{
             processed: false,
             completed: false
         }
-
-        Object.defineProperty(this, 'key', {
-            get: () => key
-        });
-
     }
 
     hasListener(listener) {
@@ -299,7 +297,7 @@ kk.Event = class kkEvent{
     }
 
     addListener(listener) {
-        if (!kk.is.f(listener))
+        if (typeof listener !== `function`)
             throw TypeError();
 
         if (this.hasListener(listener))
@@ -317,27 +315,17 @@ kk.Event = class kkEvent{
     }
 
     removeListener(listener) {
-        if (!kk.is.f(listener))
+        if (typeof listener !== `function`)
             return;
 
         this.listeners = this.listeners.filter(item => item !== listener);
     }
 
-    // Если ключ задан, то он передаётся первым аргументом.
     dispatch(...data) {
-        let key;
-
         if (this.state.completed)
             return;
 
         this.state.processed = true;
-
-        if (this.key !== undefined) {
-            key = data.shift();
-            if (key !== this.key)
-                return false;
-        }
-
         this.state.last = data;
 
         this.listeners.forEach(listener => {
@@ -450,6 +438,59 @@ kk.format.camelize = (string, dont_first_letter) =>
 kk.format.capitalize = (string) =>
     string.charAt(0).toUpperCase() + string.substr(1);
 
+kk.format.date_range_to_string = (start, end) => {
+    if (kk.is.s(start))
+        start = new Date(start);
+
+    if (kk.is.s(end))
+        end = new Date(end);
+
+    if (kk.is.D(start) && kk.is.D(end)) {
+        return `с ${ kk.date_to_string(start) } по ${ kk.date_to_string(end) }`
+    } else {
+        throw new Error(kk.msg.ia);
+    }
+}
+
+kk.format.date_to_string = input => {
+    const months = [
+        'января',
+        'февраля',
+        'марта',
+        'апреля',
+        'мая',
+        'июня',
+        'июля',
+        'августа',
+        'сентября',
+        'октября',
+        'ноября',
+        'декабря'
+    ];
+
+    let output = [];
+    let now = new Date();
+
+    if (kk.is.s(input)) {
+        input = new Date(input);
+    }
+
+    if (!(kk.is.D(input)))
+        return input;
+
+    let day = input.getDate();
+    let month = months[input.getMonth()];
+    let year = input.getFullYear();
+
+    output.push(day);
+    output.push(month);
+
+    if (year !== now.getFullYear())
+        output.push(year);
+
+    return output.join(' ');
+}
+
 kk.format.decamelize = string => split(string).join('-');
 
 kk.format.number = input => {
@@ -500,6 +541,29 @@ kk.format.phone = input => {
         + number.slice(8, 10);
 
     return output;
+}
+
+kk.format.seconds_to_string = seconds => {
+    if (!kk.is.n(seconds))
+        return seconds;
+
+    const time = [           // 1        2 3 4     5 6 7 8 9
+        ['seconds',      1, ['секунда', 'секунды', 'секунд']],
+        ['minutes',     60, ['минута', 'минуты', 'минут']],
+        ['hours',     3600, ['час', 'часа', 'часов']],
+        ['days',     86400, ['день', 'дня', 'дней']],
+        ['weeks',   604800, ['неделя', 'недели', 'недель']],
+        ['months', 2592000, ['месяц', 'месяца', 'месяцев']],
+        ['years', 22118400, ['год', 'года', 'лет']]
+    ].map(unit => {
+        return {
+            unit: unit[0],
+            value: Math.abs(Math.round(seconds / unit[1])), // !!!
+            forms: unit[2]
+        }
+    }).filter(unit => Math.abs(unit.value) > 1).pop();
+
+    return `${ time.value } ${ kk.plural(time.value, time.forms) }`;
 }
 
 })(kk);
@@ -831,30 +895,41 @@ kk.i8ArrayToString = function(array) {
 (kk => {
 // Локальное хранилище
 kk.ls = (function(kk, localStorage) {
-    var _ = {};
+    const _ = {};
 
-    _.create = function() {
-        kk.each (arguments, function(item) {
-            if ((kk.is.s(item)) && (!localStorage.getItem(item))) {
-                localStorage.setItem(item, JSON.stringify([]));
-                localStorage.setItem('@' + item, kk.ts());
-            }
-        })
+    _.on_change = new kk.Event();
+
+    _.create = (key, value = null) => {
+        if (kk.is.s(key) && !localStorage.getItem(key)) {
+            _.set(key, value, true);
+        }
     }
 
-    _.get = function(address) {
-        return JSON.parse(localStorage.getItem(address));
+    _.get = (address, default_value) => {
+        const data = localStorage.getItem(address);
+
+        if (!data && kk.is.o(default_value))
+            return _.set(address, default_value);
+
+        return JSON.parse(data);
     }
 
-    _.ts = function(address) {
-        return localStorage.getItem('@' + address);
-    }
+    _.ts = address => localStorage.getItem(`@` + address);
 
-    _.update = function(address, data) {
+    _.set = (address, data, mute) => {
         localStorage.setItem(address, JSON.stringify(data));
-        localStorage.setItem('@' + address, kk.ts());
+        localStorage.setItem(`@` + address, Date.now());
 
-        return true;
+        mute || _.on_change.dispatch();
+
+        return data;
+    }
+
+    _.remove = (address) => {
+        localStorage.removeItem(address)
+        localStorage.removeItem(`@` + address)
+
+        _.on_change.dispatch(`remove`);
     }
 
     return _;
