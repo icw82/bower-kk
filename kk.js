@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.19.0',
+    v: '0.20.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -894,7 +894,7 @@ kk.i8ArrayToString = function(array) {
 
 (kk => {
 // Локальное хранилище
-kk.ls = (function(kk, localStorage) {
+kk.ls = ((kk, localStorage) => {
     const _ = {};
 
     _.on_change = new kk.Event();
@@ -902,6 +902,7 @@ kk.ls = (function(kk, localStorage) {
     _.create = (key, value = null) => {
         if (kk.is.s(key) && !localStorage.getItem(key)) {
             _.set(key, value, true);
+            return value;
         }
     }
 
