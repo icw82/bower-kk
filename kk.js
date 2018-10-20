@@ -2,7 +2,7 @@
 
 (() => {
 const kk = {
-    v: '0.20.0',
+    v: '0.21.0',
 //    r: root // window or global
     w: null, // window (global if not)
     d: null, // root.document
@@ -98,7 +98,8 @@ kk.is = (() => {
         ['E', Element],
         ['N', Node],
         ['NL', NodeList],
-        ['C', HTMLCollection]
+        ['C', HTMLCollection],
+        ['S', Set],
     ].forEach(args => {
         is.addTest(...args);
     });
@@ -543,6 +544,44 @@ kk.format.phone = input => {
     return output;
 }
 
+kk.format.plural = (subject, ...forms) => {
+    // TODO: Для других языков.
+
+    const amount = kk.is.n(subject) ? Math.abs(subject) :
+        kk.is.A(subject) ? subject.length :
+        kk.is.S(subject) ? subject.size : null;
+
+    if (amount === null)
+        throw TypeError();
+
+    if (kk.is.A(forms[0]))
+        forms = forms[0];
+
+    if (forms.length !== 3)
+        throw Error(`Формы должно быть три`);
+
+    if (kk.is.s(forms))
+        throw TypeError();
+
+    const [ singular, paucal, plural ] = forms;
+
+    // Если есть дробная часть
+    const fraction = amount.toString().match(/(\.\d+)/);
+
+    if (fraction !== null)
+        return plural;
+
+    // (amount *= Math.pow(10, last[0].length - 1));
+    if ((amount % 10 == 1) && (amount % 100 != 11))
+        return singular;
+
+    if ((amount % 10 >= 2) && (amount % 10 <= 4) &&
+        ((amount % 100 < 10) || (amount % 100 >= 20)))
+        return paucal;
+
+    return plural;
+}
+
 kk.format.seconds_to_string = seconds => {
     if (!kk.is.n(seconds))
         return seconds;
@@ -563,7 +602,7 @@ kk.format.seconds_to_string = seconds => {
         }
     }).filter(unit => Math.abs(unit.value) > 1).pop();
 
-    return `${ time.value } ${ kk.plural(time.value, time.forms) }`;
+    return `${ time.value } ${ kk.format.plural(time.value, time.forms) }`;
 }
 
 })(kk);
@@ -936,77 +975,6 @@ kk.ls = ((kk, localStorage) => {
     return _;
 
 })(kk, localStorage);
-
-})(kk);
-
-(kk => {
-kk.plural = function() {
-    // TODO: Для других языков.
-
-    var lang = 'ru';
-    var langs = ['ru'];
-    var args = arguments;
-    var first = args[0];
-    var second = args[1];
-    var amount, singular, paucal, plural, fr;
-
-    if (kk.is.s(first)) {
-        if (langs.indexOf(first) > -1) {
-            lang = first;
-            return true;
-        } else
-            return false;
-    }
-
-    if (kk.is.n(first)) {
-        amount = first;
-    } else if (kk.is.A(first)) {
-        amount = first.length;
-    } else if (kk.is.o(first)) {
-        // NOTE: Может убрать к херам?
-        amount = 0;
-        for (var j in first)
-            amount++;
-    } else
-        return false;
-
-    if (amount < 0)
-        amount = -amount;
-
-    if (
-        kk.is.A(second) &&
-        kk.is.s(second[0]) &&
-        kk.is.s(second[1]) &&
-        kk.is.s(second[2])
-    ) {
-        singular = second[0];
-        paucal = second[1];
-        plural = second[2];
-
-    } else if (
-        kk.is.s(args[1]) &&
-        kk.is.s(args[2]) &&
-        kk.is.s(args[3])
-    ) {
-//        kk.__d();
-        return kk.plural(amount, [args[1], args[2], args[3]]);
-    } else
-        return false;
-
-    (fr = amount.toString().match(/(\.\d+)/)) &&
-        (amount *= Math.pow(10, fr[0].length - 1));
-
-    if (fr !== null)
-        return plural;
-    if ((amount % 10 == 1) && (amount % 100 != 11))
-        return singular;
-    else
-        if ((amount % 10 >= 2) && (amount % 10 <= 4) &&
-            ((amount % 100 < 10) || (amount % 100 >= 20)))
-            return paucal;
-        else
-            return plural;
-}
 
 })(kk);
 
